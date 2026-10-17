@@ -139,7 +139,7 @@
 <div id="drawer" style="display:none"></div>
 <section id="adminView" class="toolView" aria-hidden="true"><div class="toolBar"><button id="admBack" type="button">← Back</button><strong>⚙️ Admin Manager</strong></div><div class="admContent">
 <div id="admGate" class="admCard" hidden><h3 id="admGateTitle">Owner Login</h3><p class="admHint">Owner email fixed hai. Admin panel kholne ke liye password daalein.</p><label for="admEmail">Owner Email</label><input type="text" id="admEmail" value="kchandramohan6205@gmail.com" readonly autocomplete="username" style="background:#f1f5f9;color:#475569"><label for="admPin">Password</label><input type="password" id="admPin" placeholder="Firebase password" autocomplete="current-password"><div id="admGateMsg" class="admHint" style="color:#b91c1c;font-weight:700"></div><div class="admRow"><button type="button" class="go" id="admGateBtn">Login</button></div></div>
-<div id="admMain" hidden><div class="admTabs" id="admTabs"><button type="button" data-tab="sbr">🧾 Requests</button><button type="button" data-tab="sbu">👥 Users</button><button type="button" data-tab="sbm">💬 Messages</button><button type="button" data-tab="sbp">💎 Plans &amp; QR</button><button type="button" data-tab="sbs">⚙️ Sub Settings</button><button type="button" data-tab="mpan">✍️ Manual PAN</button><button type="button" data-tab="crop">✂️ Crop Setup</button><button type="button" data-tab="aad">🪪 Aadhaar Templates</button><button type="button" data-tab="atm">💳 ATM Templates</button><button type="button" data-tab="pub">📦 Publish / Backup</button></div><div id="admBody"></div></div>
+<div id="admMain" hidden><div class="admTabs" id="admTabs"><button type="button" data-tab="sbr">🧾 Requests</button><button type="button" data-tab="sbu">👥 Users</button><button type="button" data-tab="sbm">💬 Messages</button><button type="button" data-tab="sbp">💎 Plans &amp; QR</button><button type="button" data-tab="sbs">⚙️ Sub Settings</button><button type="button" data-tab="mpan">✍️ Manual PAN</button><button type="button" data-tab="crop">✂️ Crop Setup</button><button type="button" data-tab="aad">🪪 Aadhaar Templates</button><button type="button" data-tab="atm">💳 ATM Templates</button><button type="button" data-tab="kis">🌾 Kisan Templates</button><button type="button" data-tab="pass">📷 Passport Photo</button><button type="button" data-tab="pub">📦 Publish / Backup</button></div><div id="admBody"></div></div>
 </div></section>
 <style>
 .admContent{padding:14px;overflow:auto;flex:1;background:#f3f6fb;color:#172033;font-size:15px}
@@ -259,7 +259,7 @@ async function admGateGo(){
  }
 }
 async function admForgot(e){e.preventDefault();if(!confirm('PIN reset karne par is browser ka saved admin data (crop, templates) bhi hat jayega. Website wali admin-data.json ka data nahi hatega. Reset karein?'))return;try{await admPinClear();await admDel('data')}catch(x){}window.apAdminData=admEmpty();window.apAdminSource='default';admUnlocked=false;admToast('✓ Reset ho gaya. Ab naya PIN set karein.');await admGate()}
-function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
+function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,kis:admKisTab,pass:admPassTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
 
 /* ---------- image helpers ---------- */
 function admReadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Image open nahi hui'))};im.src=u})}
@@ -378,6 +378,77 @@ function admPubTab(){const D=window.apAdminData,nCrop=Object.keys(D.crops).lengt
  A$('pubSyncNow').onclick=async()=>{try{await apWriteShared(window.apAdminData);window.apAdminSource='firestore';admToast('✓ Firestore par sync ho gaya');admPubTab()}catch(e){admToast('Sync nahi hua: '+(e.message||e),1)}};
  A$('pubPinBtn').onclick=async()=>{const v=A$('pubPin').value.trim();if(v.length<4){admToast('PIN kam se kam 4 ka rakhein',1);return}try{await admPinSet(await admHash(v));A$('pubPin').value='';admToast('✓ PIN badal gaya')}catch(e){admToast(e.message,1)}};
  A$('pubReset').onclick=async()=>{if(!confirm('Shared admin data reset karein? Sabhi users ke templates bhi reset honge.'))return;window.apAdminData=admEmpty();try{await admSave();admToast('✓ Reset aur Firestore sync ho gaya');admPubTab()}catch(e){admToast('Error: '+e.message,1)}}}
+
+
+/* ---------- 5) KISAN TEMPLATES (Firestore: publicConfig/kisan) ---------- */
+const OWNER_UID_X='ofSt3V2PnDbFSVidk0T8aGpWjot2',KIS_DOC='publicConfig/kisan',KIS_W=1012,KIS_H=638,KIS_MAX=900000;
+let KIS=null;
+function admOwnerCheck(){const u=apFirebaseAuth&&apFirebaseAuth.currentUser;if(!u||u.uid!==OWNER_UID_X)throw new Error('Sirf owner account save kar sakta hai (owner login karein)')}
+async function kisLoad(){if(!apFirestore)throw new Error('Firebase Firestore load nahi hua');const sn=await apFirestore.doc(KIS_DOC).get(),d=sn.exists?(sn.data().data||{}):{};KIS={list:Array.isArray(d.list)?d.list:[],hideBuiltin:!!d.hideBuiltin};return KIS}
+const kisBytes=()=>new Blob([JSON.stringify(KIS)]).size;
+async function kisSave(){admOwnerCheck();if(kisBytes()>KIS_MAX)throw new Error('Template data bahut bada hai ('+Math.round(kisBytes()/1024)+' KB). 900 KB se kam rakhein, purane template delete karein.');
+ await apFirestore.doc(KIS_DOC).set({data:KIS,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})}
+async function kisImg(file){const im=await admReadImg(file),c=document.createElement('canvas');c.width=KIS_W;c.height=KIS_H;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,KIS_W,KIS_H);x.imageSmoothingQuality='high';x.drawImage(im,0,0,KIS_W,KIS_H);return c.toDataURL('image/jpeg',.86)}
+async function admKisTab(){
+ A$('admBody').innerHTML='<div class="admCard"><p class="admHint">Load ho raha hai…</p></div>';
+ await kisLoad();const L=KIS.list,kb=Math.round(kisBytes()/1024);
+ const up=(label,act,id)=>`<label class="admBtn">${label}<input type="file" accept="image/*" hidden data-kx="${act}" data-id="${id}"></label>`;
+ const item=(t,i)=>`<div class="admItem"><b>${i+1}. Template</b><div class="nm" style="margin-top:6px"><input type="text" id="kisN_${t.id}" value="${pmEsc(t.name)}"><button type="button" class="admBtn go" data-kx="ren" data-id="${t.id}">Naam save</button></div>
+  <div class="admThumbs">${admThumb(t.front,'Front nahi')}${admThumb(t.back,'Back nahi')}</div>
+  <div class="admRow">${up('Front badlein','rf',t.id)}${t.front?`<button type="button" class="admBtn" data-kx="df" data-id="${t.id}">Front hatayein</button>`:''}${up('Back badlein','rb',t.id)}${t.back?`<button type="button" class="admBtn" data-kx="db" data-id="${t.id}">Back hatayein</button>`:''}<button type="button" class="admBtn danger" data-kx="del" data-id="${t.id}">🗑 Delete</button></div></div>`;
+ A$('admBody').innerHTML=`<div class="admCard"><h3>🌾 Kisan Card – Templates</h3><p class="admHint">Yahan jo front/back template jodenge wo Kisan tool ke <b>Template dropdown</b> me sabhi users ko dikhenge. Image ka size <b>85.6 × 54 mm</b> (ratio 1.585) ka rakhein, jaise <b>1012 × 638</b>. Tool Photo, QR, Naam, Father, DOB, Mobile, Aadhaar, Farmer ID aur Address template ke upar likhta hai (Front/Back dono me jaise abhi ka layout hai).</p>
+ <p class="admHint">Purane (built-in) 3 templates: <b>${KIS.hideBuiltin?'hata diye gaye hain':'dikh rahe hain'}</b></p>
+ <div class="admRow"><button type="button" class="admBtn ${KIS.hideBuiltin?'go':'danger'}" data-kx="togb">${KIS.hideBuiltin?'↩ Purane templates wapas laayein':'🗑 Purane templates hatayein'}</button></div>
+ <p class="admHint">Purane tabhi hat'te hain jab kam se kam 1 naya template ho; naya na ho to tool built-in dikhata rahega.</p>
+ <p class="admHint">Storage: <b>${kb} KB / 900 KB</b></p></div>
+ <div class="admCard"><h3>➕ Naya template jodein</h3><label>Template ka naam</label><input type="text" id="kisNewName" placeholder="Jaise: Green Kisan Card"><label>Front template image</label><input type="file" id="kisNewF" accept="image/*"><label>Back template image</label><input type="file" id="kisNewB" accept="image/*"><p class="admHint">Dono me se ek bhi chalega; jo side nahi doge usme purana built-in design lagega.</p><div class="admRow"><button type="button" class="go" id="kisAdd">➕ Add karein</button></div></div>
+ <div class="admCard"><h3>Templates (${L.length})</h3>${L.map(item).join('')||'<p class="admHint">Abhi koi naya template nahi hai.</p>'}</div>`;
+ A$('kisAdd').onclick=async()=>{const n=A$('kisNewName').value.trim(),ff=A$('kisNewF').files[0],bf=A$('kisNewB').files[0];if(!n){admToast('Template ka naam likhein',1);return}if(!ff&&!bf){admToast('Kam se kam ek image chunein',1);return}
+  try{KIS.list.push({id:admId(),name:n,front:ff?await kisImg(ff):null,back:bf?await kisImg(bf):null});await kisSave();admToast('✓ Template add ho gaya: '+n);admKisTab()}catch(e){await kisLoad().catch(()=>{});admToast('Add nahi hua: '+e.message,1)}}
+}
+async function admKisAct(el){const id=el.dataset.id,act=el.dataset.kx;
+ try{await kisLoad();const t=KIS.list.find(x=>x.id===id);
+  if(act==='togb'){if(!KIS.hideBuiltin&&!KIS.list.length){admToast('Pehle ek naya template jodein, phir purane hataye ja sakte hain',1);return}if(!KIS.hideBuiltin&&!confirm('Purane 3 built-in templates users ke liye hata dein?'))return;KIS.hideBuiltin=!KIS.hideBuiltin;await kisSave();admToast(KIS.hideBuiltin?'Purane templates hata diye':'Purane templates wapas aa gaye');admKisTab()}
+  else if(act==='ren'){const v=A$('kisN_'+id).value.trim();if(!v){admToast('Naam khali nahi ho sakta',1);return}t.name=v;await kisSave();admToast('✓ Naam save ho gaya')}
+  else if(act==='del'){if(!confirm('"'+t.name+'" template delete karein?'))return;KIS.list=KIS.list.filter(x=>x.id!==id);if(!KIS.list.length)KIS.hideBuiltin=false;await kisSave();admToast('Delete ho gaya');admKisTab()}
+  else if(act==='df'||act==='db'){t[act==='df'?'front':'back']=null;if(!t.front&&!t.back){admToast('Kam se kam ek side rakhein, poora hatana ho to Delete dabayein',1);return}await kisSave();admToast('✓ Hata diya');admKisTab()}
+  else if(act==='rf'||act==='rb'){const f=el.files[0];if(!f)return;t[act==='rf'?'front':'back']=await kisImg(f);await kisSave();admToast('✓ Template badal gaya');admKisTab()}
+ }catch(e){admToast('Error: '+(e.message||e),1)}}
+
+/* ---------- 6) PASSPORT PHOTO (API keys + kitne photo process hue) ---------- */
+const PP_DOC='publicConfig/passport';
+const ppMask=k=>k?(k.length>8?k.slice(0,3)+'••••••'+k.slice(-3):'••••'):'—';
+async function admPassTab(){
+ A$('admBody').innerHTML='<div class="admCard"><p class="admHint">Load ho raha hai…</p></div>';
+ if(!apFirestore)throw new Error('Firebase Firestore load nahi hua');
+ const sn=await apFirestore.doc(PP_DOC).get(),c=sn.exists?sn.data():{};
+ const st={n:0,k1:0,k2:0,users:[],err:null};
+ try{const q=await apFirestore.collection('pstats').get();q.forEach(d=>{const x=d.data();st.n+=x.n||0;st.k1+=x.k1||0;st.k2+=x.k2||0;st.users.push(x)})}catch(e){st.err=e}
+ st.users.sort((a,b)=>(b.n||0)-(a.n||0));
+ const fd=t=>t?new Date(t).toLocaleString('en-GB'):'—';
+ const keyBox=i=>`<label>API Key ${i} ${i===1?'(pehle ye chalegi)':'(Key 1 ka limit khatam hone par ye chalegi)'}</label><div class="nm"><input type="password" id="ppK${i}" value="${pmEsc(c['k'+i]||'')}" placeholder="remove.bg API key ${i}" autocomplete="off"><button type="button" class="admBtn" data-pp="eye" data-i="${i}">👁</button></div>
+  <div class="admRow"><button type="button" class="admBtn" data-pp="chk" data-i="${i}">🔎 Credits check karein</button><span class="admHint" id="ppC${i}">Saved: <b>${pmEsc(ppMask(c['k'+i]||''))}</b></span></div>`;
+ A$('admBody').innerHTML=`<div class="admCard"><h3>📷 Passport Photo – Kitna kaam hua</h3>
+  ${st.err?'<p class="admHint" style="color:#b91c1c">Count padh nahi paya — Firestore Rules dobara publish karein (firestore.rules.txt).</p>':`<p class="admHint">Total successful photo: <b style="font-size:20px">${st.n}</b></p><p class="admHint">Key 1 se: <b>${st.k1}</b> • Key 2 se: <b>${st.k2}</b> • Users: <b>${st.users.length}</b></p>`}
+  ${st.users.length?`<div style="max-height:260px;overflow:auto;margin-top:8px"><table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="text-align:left;color:#475569"><th>User</th><th>Mobile</th><th>Photo</th><th>Aakhri</th></tr>${st.users.slice(0,50).map(u=>`<tr style="border-top:1px solid #e2e8f0"><td>${pmEsc(u.name||'—')}</td><td>${pmEsc(u.mobile||'—')}</td><td><b>${u.n||0}</b></td><td>${fd(u.last)}</td></tr>`).join('')}</table></div>`:''}
+  <div class="admRow"><button type="button" class="admBtn go" data-pp="ref">🔄 Refresh</button><button type="button" class="admBtn danger" data-pp="rst">♻ Count zero karein</button></div></div>
+ <div class="admCard"><h3>🔑 API Keys (remove.bg)</h3><p class="admHint">Key 1 pehle use hoti hai. Uska limit/credits khatam hote hi tool apne aap Key 2 se kaam karta hai (aur Key 2 ka khatam ho to Key 1 try karta hai). Key badalte hi sabhi users ke liye lag jaati hai. Dono khali chhodne par purani built-in key chalegi.</p>
+  ${keyBox(1)}${keyBox(2)}<div class="admRow"><button type="button" class="go" data-pp="save">💾 Keys save karein</button></div></div>`;
+}
+async function admPassAct(el){const act=el.dataset.pp,i=el.dataset.i;
+ try{
+  if(act==='eye'){const e=A$('ppK'+i);e.type=e.type==='password'?'text':'password'}
+  else if(act==='ref'){admPassTab()}
+  else if(act==='save'){admOwnerCheck();const k1=A$('ppK1').value.trim(),k2=A$('ppK2').value.trim();if(k1&&k2&&k1===k2){admToast('Dono key alag honi chahiye',1);return}
+   await apFirestore.doc(PP_DOC).set({k1,k2,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});admToast('✓ Keys save ho gayi — sabhi users ke liye lag gayi');admPassTab()}
+  else if(act==='rst'){admOwnerCheck();if(!confirm('Passport photo ka count sabhi users ka zero kar dein?'))return;const q=await apFirestore.collection('pstats').get();let b=apFirestore.batch(),n=0;for(const d of q.docs){b.delete(d.ref);if(++n%400===0){await b.commit();b=apFirestore.batch()}}await b.commit();admToast('✓ Count zero ho gaya');admPassTab()}
+  else if(act==='chk'){const k=A$('ppK'+i).value.trim(),o=A$('ppC'+i);if(!k){o.textContent='Pehle key daalein';return}o.textContent='Check ho raha hai…';
+   try{const r=await fetch('https://api.remove.bg/v1.0/account',{headers:{'X-Api-Key':k}});if(!r.ok){o.innerHTML='<span style="color:#b91c1c">Key sahi nahi / band hai (HTTP '+r.status+')</span>';return}
+    const j=await r.json(),a=(j.data||{}).attributes||{},cr=a.credits||{},ap=a.api||{};o.innerHTML='Credits: <b>'+(cr.total!=null?cr.total:'—')+'</b> • Free API calls: <b>'+(ap.free_calls!=null?ap.free_calls:'—')+'</b>'}
+   catch(e){o.innerHTML='<span style="color:#b91c1c">Check nahi ho paya (internet / browser block): '+pmEsc(e.message||e)+'</span>'}}
+ }catch(e){admToast('Error: '+(e.message||e),1)}}
+A$('admBody').addEventListener('click',e=>{const b=e.target.closest('[data-kx]');if(b&&b.tagName!=='INPUT'&&admTab==='kis')admKisAct(b);const q=e.target.closest('[data-pp]');if(q&&admTab==='pass')admPassAct(q)});
+A$('admBody').addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('input[data-kx]')&&admTab==='kis')admKisAct(i)});
 
 /* ---------- wiring ---------- */
 A$('admBack').onclick=closeAdmin;A$('admGateBtn').onclick=admGateGo;A$('admPin').addEventListener('keydown',e=>{if(e.key==='Enter')admGateGo()});
@@ -533,10 +604,10 @@ SB.waLink=(mobile,msg)=>{let m=String(mobile||'').replace(/\D/g,'');if(m.length=
 SB.copy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
 
 /* ---------- Access control: kaun sa user kaun sa section chala sakta hai ---------- */
-SB.SECS=[{k:'aadhaar',n:'🪪 Aadhaar Services'},{k:'pan',n:'▤ PAN Card Services',sub:[{k:'pan_uti',n:'UTI PAN'},{k:'pan_nsdl',n:'NSDL PAN'},{k:'pan_manual',n:'Manual PAN'}]},{k:'voter',n:'🗳️ Voter ID Services'},{k:'apaar',n:'🎓 APAAR ID Services'},{k:'ayushman',n:'🌿 Ayushman Card'},{k:'ippb',n:'🏦 IPPB Passbook'},{k:'ippb-atm',n:'💳 IPPB ATM Card'},{k:'print-manager',n:'🖨️ Print Manager'},{k:'abha',n:'ABHA Card (jald aayega)'},{k:'eshram',n:'E-Shram & Labour Card (jald aayega)'},{k:'dl',n:'Driving Licence & RC (jald aayega)'},{k:'farmer',n:'Farmer / Kisan Services (jald aayega)'}];
-SB.ALLK=SB.SECS.flatMap(x=>[x.k].concat((x.sub||[]).map(y=>y.k)));
+SB.SECS=[{k:'aadhaar',n:'🪪 Aadhaar Services'},{k:'pan',n:'▤ PAN Card Services',sub:[{k:'pan_uti',n:'UTI PAN'},{k:'pan_nsdl',n:'NSDL PAN'},{k:'pan_manual',n:'Manual PAN'}]},{k:'voter',n:'🗳️ Voter ID Services'},{k:'apaar',n:'🎓 APAAR ID Services'},{k:'ayushman',n:'🌿 Ayushman Card'},{k:'ippb',n:'🏦 IPPB Passbook'},{k:'ippb-atm',n:'💳 IPPB ATM Card'},{k:'print-manager',n:'🖨️ Print Manager'},{k:'abha',n:'ABHA Card (jald aayega)'},{k:'eshram',n:'E-Shram & Labour Card (jald aayega)'},{k:'dl',n:'Driving Licence & RC (jald aayega)'},{k:'farmer',n:'🌾 Farmer / Kisan Card'},{k:'passport',n:'📷 Passport Photo'}];
+SB.ALLK=SB.SECS.flatMap(x=>[x.k].concat((x.sub||[]).map(y=>y.k))).concat(['apaaredit']);
 SB.perms=(u,d)=>Array.isArray(u.perms)?u.perms:(Array.isArray(d.settings.defPerms)?d.settings.defPerms:SB.ALLK);
-SB.XPERMS=[{k:'editprofile',n:'✏️ Profile Details Edit (user apni naam/email khud badal sake)'}];
+SB.XPERMS=[{k:'editprofile',n:'✏️ Profile Details Edit (user apni naam/email khud badal sake)'},{k:'apaaredit',n:'🎓 APAAR ID: Details Edit option (card kat jane ke baad Edit Details dikhe)'}];
 SB.permBoxes=sel=>{const card=(x,sub)=>'<label class="sbPmCard'+(sub?' sub':'')+'"><input type="checkbox" class="sbPerm" value="'+x.k+'" '+(sel.includes(x.k)?'checked':'')+'><span class="sw"></span><span class="tx">'+x.n+'</span></label>';
  return '<div class="sbPmTitle">Services</div><div class="sbPmGrid">'+SB.SECS.map(x=>card(x)+(x.sub?x.sub.map(y=>card(y,1)).join(''):'')).join('')+'</div><div class="sbPmTitle">Extra permission</div><div class="sbPmGrid one">'+SB.XPERMS.map(x=>card(x)).join('')+'</div>'};
 SB.permCount=(u,d)=>SB.perms(u,d).filter(k=>SB.SECS.some(x=>x.k===k)).length+'/'+SB.SECS.length;
