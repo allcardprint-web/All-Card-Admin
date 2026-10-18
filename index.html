@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0755c9"><title>All Print | Admin Panel</title>
+<html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0755c9"><link rel="manifest" href="manifest.json"><link rel="icon" href="favicon.png"><link rel="apple-touch-icon" href="icon-192.png"><title>All Print | Admin Panel</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f6fb;color:#172033}
 .toolView{display:none;position:fixed;inset:0;z-index:1000;background:#f3f6fb;color:#172033;flex-direction:column}
@@ -137,9 +137,9 @@
 </style>
 </head><body>
 <div id="drawer" style="display:none"></div>
-<section id="adminView" class="toolView" aria-hidden="true"><div class="toolBar"><button id="admBack" type="button">← Back</button><strong>⚙️ Admin Manager</strong></div><div class="admContent">
+<section id="adminView" class="toolView" aria-hidden="true"><div class="toolBar"><button id="admBack" type="button">← Back</button><span class="tbSep"></span><strong>⚙️ Admin Manager</strong><button id="admInst" type="button" style="margin-left:auto;display:none">📲 Install</button></div><div class="admContent">
 <div id="admGate" class="admCard" hidden><h3 id="admGateTitle">Owner Login</h3><p class="admHint">Owner email fixed hai. Admin panel kholne ke liye password daalein.</p><label for="admEmail">Owner Email</label><input type="text" id="admEmail" value="kchandramohan6205@gmail.com" readonly autocomplete="username" style="background:#f1f5f9;color:#475569"><label for="admPin">Password</label><input type="password" id="admPin" placeholder="Firebase password" autocomplete="current-password"><div id="admGateMsg" class="admHint" style="color:#b91c1c;font-weight:700"></div><div class="admRow"><button type="button" class="go" id="admGateBtn">Login</button></div></div>
-<div id="admMain" hidden><div class="admTabs" id="admTabs"><button type="button" data-tab="sbr">🧾 Requests</button><button type="button" data-tab="sbu">👥 Users</button><button type="button" data-tab="sbm">💬 Messages</button><button type="button" data-tab="sbp">💎 Plans &amp; QR</button><button type="button" data-tab="sbs">⚙️ Sub Settings</button><button type="button" data-tab="mpan">✍️ Manual PAN</button><button type="button" data-tab="crop">✂️ Crop Setup</button><button type="button" data-tab="aad">🪪 Aadhaar Templates</button><button type="button" data-tab="atm">💳 ATM Templates</button><button type="button" data-tab="kis">🌾 Kisan Templates</button><button type="button" data-tab="pass">📷 Passport Photo</button><button type="button" data-tab="pub">📦 Publish / Backup</button></div><div id="admBody"></div></div>
+<div id="admMain" hidden><div class="admTabs" id="admTabs"><button type="button" data-tab="sbr">🧾 Requests</button><button type="button" data-tab="sbu">👥 Users</button><button type="button" data-tab="sbm">💬 Messages</button><button type="button" data-tab="sbp">💎 Plans &amp; QR</button><button type="button" data-tab="sbs">⚙️ Sub Settings</button><button type="button" data-tab="mpan">✍️ Manual PAN</button><button type="button" data-tab="crop">✂️ Crop Setup</button><button type="button" data-tab="aad">🪪 Aadhaar Templates</button><button type="button" data-tab="atm">💳 ATM Templates</button><button type="button" data-tab="kis">🌾 Kisan Templates</button><button type="button" data-tab="pass">📷 Passport Photo</button><button type="button" data-tab="pbk">📘 Passbook Template</button><button type="button" data-tab="pub">📦 Publish / Backup</button></div><div id="admBody"></div></div>
 </div></section>
 <style>
 .admContent{padding:14px;overflow:auto;flex:1;background:#f3f6fb;color:#172033;font-size:15px}
@@ -168,6 +168,26 @@
 .admThumbs div{aspect-ratio:85.6/54;background:#eef2f7;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:11px;color:#94a3b8}
 .admThumbs img{width:100%;height:100%;object-fit:cover;display:block}
 .admToast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#15803d;color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;z-index:3000;box-shadow:0 6px 20px #0004;max-width:90%;text-align:center}
+
+/* ===== Admin look (card tiles) ===== */
+.tbSep{width:1px;height:30px;background:#ffffff55}
+.toolBar strong{font-size:19px;white-space:nowrap}.toolBar button{white-space:nowrap}#admInst{padding:8px 11px!important;font-size:13px!important}
+.admContent{background:linear-gradient(#f5f9ff,#edf3fb)}
+.admCard{border-radius:20px;padding:18px;box-shadow:0 4px 16px #0b3d9112}
+.admCard h3{font-size:22px;color:#0652c4;font-weight:800}
+.admCard h3 .hi{display:inline-flex;width:44px;height:44px;border-radius:12px;background:#e8f1ff;align-items:center;justify-content:center;font-size:22px;margin-right:10px;vertical-align:middle}
+#admTabs{display:flex;flex-wrap:wrap;gap:11px;margin-bottom:16px}
+#admTabs button{flex:1 1 auto;display:flex;align-items:center;gap:10px;background:#fff;color:#0b3d91;border-radius:16px;padding:9px 12px;box-shadow:0 3px 12px #0b3d9114;font-size:15px;text-align:left;min-width:0}
+#admTabs button .ti{width:38px;height:38px;border-radius:11px;background:#e8f1ff;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto}
+#admTabs button .tl{flex:1;font-weight:800;white-space:nowrap}
+#admTabs button .tc{opacity:.45;font-size:22px;font-weight:400}
+#admTabs button.on{background:linear-gradient(110deg,#0651c9,#2b8cf4);color:#fff;box-shadow:0 8px 18px #0b5fd855}
+#admTabs button.on .ti{background:#ffffff33}
+#admTabs button.on .tc{opacity:.9}
+.sbChips{gap:10px!important}
+.sbChips button{border-radius:14px!important;background:#e8f1fd!important;color:#0b3d91!important;padding:12px 16px!important;font-size:16px!important;font-weight:800!important}
+.sbChips button.on{background:linear-gradient(110deg,#0651c9,#2b8cf4)!important;color:#fff!important;box-shadow:0 6px 14px #0b5fd844}
+.admBtn,.admRow button{border-radius:12px}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -259,7 +279,7 @@ async function admGateGo(){
  }
 }
 async function admForgot(e){e.preventDefault();if(!confirm('PIN reset karne par is browser ka saved admin data (crop, templates) bhi hat jayega. Website wali admin-data.json ka data nahi hatega. Reset karein?'))return;try{await admPinClear();await admDel('data')}catch(x){}window.apAdminData=admEmpty();window.apAdminSource='default';admUnlocked=false;admToast('✓ Reset ho gaya. Ab naya PIN set karein.');await admGate()}
-function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,kis:admKisTab,pass:admPassTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
+function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,kis:admKisTab,pass:admPassTab,pbk:admPbkTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
 
 /* ---------- image helpers ---------- */
 function admReadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Image open nahi hui'))};im.src=u})}
@@ -449,6 +469,47 @@ async function admPassAct(el){const act=el.dataset.pp,i=el.dataset.i;
  }catch(e){admToast('Error: '+(e.message||e),1)}}
 A$('admBody').addEventListener('click',e=>{const b=e.target.closest('[data-kx]');if(b&&b.tagName!=='INPUT'&&admTab==='kis')admKisAct(b);const q=e.target.closest('[data-pp]');if(q&&admTab==='pass')admPassAct(q)});
 A$('admBody').addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('input[data-kx]')&&admTab==='kis')admKisAct(i)});
+
+
+/* ---------- 7) IPPB PASSBOOK TEMPLATE (Firestore: publicConfig/passbook) ---------- */
+const PBK_DOC='publicConfig/passbook',PBK_MAXLEN=960000;
+async function pbkImg(file){const im=await admReadImg(file);let w=Math.min(im.naturalWidth||im.width,2000),q=.92,url='';
+ for(let i=0;i<14;i++){const h=Math.round(w*(im.naturalHeight||im.height)/(im.naturalWidth||im.width)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.imageSmoothingQuality='high';x.drawImage(im,0,0,w,h);url=c.toDataURL('image/jpeg',q);if(url.length<=PBK_MAXLEN)return url;if(q>.6)q-=.08;else w=Math.round(w*.88)}
+ throw new Error('Image bahut bhari hai, chhoti image chunein')}
+async function admPbkTab(){
+ A$('admBody').innerHTML='<div class="admCard"><p class="admHint">Load ho raha hai…</p></div>';
+ if(!apFirestore)throw new Error('Firebase Firestore load nahi hua');
+ const sn=await apFirestore.doc(PBK_DOC).get(),c=sn.exists?sn.data():null,has=!!(c&&c.img);
+ A$('admBody').innerHTML=`<div class="admCard"><h3><span class="hi">📘</span>IPPB Passbook – Template</h3><p class="admHint">Yahan jo template upload karenge wahi sabhi users ke <b>IPPB Passbook</b> tool me lagega. Template <b>poore A4 page</b> ki image ho (aage + peeche dono card), bilkul abhi wale passbook jaise layout me — Name, Account No., CIF aur QR usi jagah par aate hain.</p>
+ <p class="admHint">Abhi: <b>${has?'Admin ka template laga hua hai':'Built-in (purana) template chal raha hai'}</b>${has?' • '+Math.round(c.img.length/1024)+' KB':''}</p>
+ ${has?`<div class="admThumbs" style="grid-template-columns:1fr"><div style="aspect-ratio:210/297;max-width:260px;margin:auto"><img src="${c.img}" alt=""></div></div>`:''}
+ <label>${has?'Template badlein':'Naya template chunein'} (A4 page image)</label><input type="file" id="pbkFile" accept="image/*">
+ <div class="admRow"><button type="button" class="go" id="pbkSave">⬆ Upload karein</button>${has?'<button type="button" class="danger" id="pbkDel">🗑 Hatayein (built-in par wapas)</button>':''}</div></div>`;
+ A$('pbkSave').onclick=async()=>{try{admOwnerCheck();const f=A$('pbkFile').files[0];if(!f){admToast('Pehle image chunein',1);return}
+  const img=await pbkImg(f);await apFirestore.doc(PBK_DOC).set({img,name:f.name,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});admToast('✓ Passbook template lag gaya');admPbkTab()}catch(e){admToast('Upload nahi hua: '+(e.message||e),1)}};
+ if(A$('pbkDel'))A$('pbkDel').onclick=async()=>{try{admOwnerCheck();if(!confirm('Admin ka template hata kar built-in par wapas jayein?'))return;await apFirestore.doc(PBK_DOC).delete();admToast('Template hata diya');admPbkTab()}catch(e){admToast('Error: '+(e.message||e),1)}};
+}
+
+/* ---------- 8) Admin tabs ko tile look dena ---------- */
+(function(){const ic=document.querySelectorAll('#admTabs button');ic.forEach(b=>{if(b.querySelector('.ti'))return;const t=b.textContent.trim(),m=t.match(/^(\S+)\s+(.*)$/);if(!m)return;b.innerHTML='<span class="ti">'+m[1]+'</span><span class="tl">'+m[2]+'</span><span class="tc">›</span>'})})();
+
+/* ---------- 9) PWA: Admin ko install karna ---------- */
+(function(){let ip=null;const standalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+ const pop=(t,p,keep)=>{const o0=document.getElementById('admPop');if(o0)o0.remove();const o=document.createElement('div');o.id='admPop';o.style.cssText='position:fixed;inset:0;background:#0007;z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px';
+  o.innerHTML='<div style="background:#fff;border-radius:18px;padding:20px 18px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px #0006"><h3 style="margin:0 0 10px;color:#0652c4;font-size:19px"></h3><p style="font-size:14.5px;line-height:1.55;color:#334155;margin:6px 0"></p><button type="button" style="width:100%;margin-top:10px;padding:12px;border:0;border-radius:10px;font-weight:800;font-size:15px;background:#0755c9;color:#fff;cursor:pointer">OK</button></div>';
+  o.querySelector('h3').textContent=t;o.querySelector('p').textContent=p;o.querySelector('button').onclick=()=>o.remove();o.onclick=e=>{if(e.target===o)o.remove()};document.body.appendChild(o)};
+ const btn=()=>document.getElementById('admInst');
+ const sync=()=>{const b=btn();if(b)b.style.display=standalone()?'none':'inline-block'};
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;sync()});
+ window.addEventListener('appinstalled',()=>{ip=null;pop('✅ App install ho gaya!','Admin Manager aapke phone me add ho gaya. Home screen ya app list se kholein.');sync()});
+ const go=async()=>{if(standalone()){pop('ℹ️ Pehle se install hai','Admin Manager is phone me pehle se hai. Home screen ya app list se kholein.');return}
+  if(ip){const e=ip;ip=null;let r=null;try{e.prompt();r=await e.userChoice}catch(x){}
+   if(r&&r.outcome==='accepted')pop('✅ App install ho gaya!','Admin Manager aapke phone me add ho gaya. Home screen ya app list se kholein.');else pop('❌ Install cancel hua','App install nahi hua. Jab chahein Install button dobara dabayein.');return}
+  pop('ℹ️ Install option abhi nahi hai','Ya to app pehle se installed hai (home screen / app list me dekhein), ya Chrome me page ek baar refresh karke kuch second ruk kar Install dabayein.')};
+ document.addEventListener('click',e=>{if(e.target&&e.target.id==='admInst')go()});
+ sync();
+ if('serviceWorker' in navigator)window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js').catch(()=>{})});
+})();
 
 /* ---------- wiring ---------- */
 A$('admBack').onclick=closeAdmin;A$('admGateBtn').onclick=admGateGo;A$('admPin').addEventListener('keydown',e=>{if(e.key==='Enter')admGateGo()});
@@ -670,7 +731,7 @@ SB.v=id=>{const e=document.getElementById(id);return e?e.value.trim():''};
 SB.badge=(t,c)=>'<span class="admBadge '+c+'">'+t+'</span>';
 SB.ubadge=u=>{const s=SB.ustat(u);return s==='active'?SB.badge('● Active','ok'):s==='expired'?SB.badge('● Expired','sbRed'):SB.badge('● Blocked','sbDark')};
 SB.rbadge=r=>r.status==='pending'?SB.badge('⏳ Pending','sbAmb'):r.status==='approved'?SB.badge('✅ Approved','ok'):SB.badge('❌ Rejected','sbRed');
-SB.subsBadge=async()=>{try{const d=await SB.get(),n=d.requests.filter(r=>r.status==='pending').length,m=d.msgs.filter(x=>x.status==='new').length,b=document.querySelector('#admTabs button[data-tab="sbr"]'),c=document.querySelector('#admTabs button[data-tab="sbm"]');if(b)b.textContent='🧾 Requests'+(n?' ('+n+')':'');if(c)c.textContent='💬 Messages'+(m?' ('+m+')':'')}catch(e){}};
+SB.subsBadge=async()=>{try{const d=await SB.get(),n=d.requests.filter(r=>r.status==='pending').length,m=d.msgs.filter(x=>x.status==='new').length,b=document.querySelector('#admTabs button[data-tab="sbr"]'),c=document.querySelector('#admTabs button[data-tab="sbm"]');const sl=(el,t)=>{const l=el&&el.querySelector('.tl');if(l)l.textContent=t;else if(el)el.textContent=t};sl(b,'Requests'+(n?' ('+n+')':''));sl(c,'Messages'+(m?' ('+m+')':''))}catch(e){}};
 window.subsBadge=SB.subsBadge;
 
 /* ---------- TAB 1: Payment requests ---------- */
@@ -809,13 +870,13 @@ SB.act=async b=>{const a=b.dataset.sb,id=b.dataset.id;
   case 'rshot':{const img=await SB.shot(id);if(img)SB.modal('<h3>Payment screenshot — '+id+'</h3><img src="'+img+'" style="width:100%;border-radius:10px" alt="">');else admToast('Screenshot nahi mila',1);break}
   case 'rapp':{const d=await SB.get(),r=d.requests.find(x=>x.id===id);if(!r)return;
    if(!confirm(r.name+' ('+r.mobile+')\n'+r.planName+' • ₹'+r.price+' • '+r.days+' din\nUTR: '+(r.utr||'—')+'\n\nPayment mil gaya? Approve karein?'))return;
-   const x=await SB.approve(id);await subsReqTab();
+   const x=await SB.approve(id);admTab='sbu';admRender();
    const msg=x.isNew?('Namaste '+x.u.name+', aapka '+x.biz+' account active ho gaya hai.\n\nUser ID: '+x.u.uid+'\nPassword: '+x.u.uid+' (mobile number)\nPlan: '+x.r.planName+' - '+x.r.days+' Days\nExpiry: '+SB.fmtD(x.u.expiry)+'\n\nNote: Ek ID sirf ek device par chalegi.'):('Namaste '+x.u.name+', aapka '+x.biz+' plan renew ho gaya hai.\n\nPlan: '+x.r.planName+' - '+x.r.days+' Days\nNayi Expiry: '+SB.fmtD(x.u.expiry));
    SB._wa=SB.waLink(x.u.mobile,msg);SB._msg=msg;
    SB.modal('<h3>✅ Approved</h3><p class="admHint">'+(x.isNew?'Naya account ban gaya. User ID aur password dono: <b>'+pmEsc(x.u.uid)+'</b> (password baad me Users tab se badal sakte hain).':'Plan renew ho gaya.')+'<br>Nayi expiry: <b>'+SB.fmtD(x.u.expiry)+'</b></p><pre class="sbPre">'+pmEsc(msg)+'</pre><div class="admRow"><button type="button" class="admBtn go" data-sb="wasend">💬 WhatsApp se bhejein</button><button type="button" class="admBtn" data-sb="msgcopy">📋 Copy</button></div>');break}
   case 'wasend':window.open(SB._wa,'_blank');break;
   case 'msgcopy':admToast(await SB.copy(SB._msg)?'✓ Copy ho gaya':'Copy nahi hua',0);break;
-  case 'rrej':{const n=prompt('Reject karne ka reason (optional):');if(n===null)return;await SB.tx(async d=>{const r=d.requests.find(x=>x.id===id);if(r&&r.status==='pending'){r.status='rejected';r.note=n.trim();r.done=Date.now()}});admToast('Request reject ho gayi');subsReqTab();break}
+  case 'rrej':{if(!confirm('Ye request reject karke hata dein?'))return;await SB.tx(async d=>{d.requests=d.requests.filter(x=>x.id!==id)});admToast('Request reject hokar hat gayi');subsReqTab();break}
   case 'rdel':if(!confirm('Ye request delete karein?'))return;await SB.tx(async d=>{d.requests=d.requests.filter(x=>x.id!==id)});subsReqTab();break;
   /* users */
   case 'uman':SB.openUser(id);break;
