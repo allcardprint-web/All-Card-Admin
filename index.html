@@ -471,23 +471,41 @@ A$('admBody').addEventListener('change',e=>{const i=e.target;if(i.matches&&i.mat
 
 
 /* ---------- 7) IPPB PASSBOOK TEMPLATE (Firestore: publicConfig/passbook) ---------- */
-const PBK_DOC='publicConfig/passbook',PBK_MAXLEN=960000;
-async function pbkImg(file){const im=await admReadImg(file);let w=Math.min(im.naturalWidth||im.width,2000),q=.92,url='';
- for(let i=0;i<14;i++){const h=Math.round(w*(im.naturalHeight||im.height)/(im.naturalWidth||im.width)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.imageSmoothingQuality='high';x.drawImage(im,0,0,w,h);url=c.toDataURL('image/jpeg',q);if(url.length<=PBK_MAXLEN)return url;if(q>.6)q-=.08;else w=Math.round(w*.88)}
+const PBK_DOC='publicConfig/passbook',PBK_SIDE_MAX=430000;
+/* safed (white/transparent) kinara kaatna */
+function pbkTrim(im){const w=im.naturalWidth||im.width,h=im.naturalHeight||im.height,c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(im,0,0);
+ const d=x.getImageData(0,0,w,h).data,rc=new Uint32Array(h),cc=new Uint32Array(w);
+ for(let y=0;y<h;y++)for(let xx=0;xx<w;xx++){const i=(y*w+xx)*4;if(d[i+3]>20&&(d[i]<235||d[i+1]<235||d[i+2]<235)){rc[y]++;cc[xx]++}}
+ const th=3;let t=0,b=h-1,l=0,r=w-1;while(t<h&&rc[t]<th)t++;while(b>t&&rc[b]<th)b--;while(l<w&&cc[l]<th)l++;while(r>l&&cc[r]<th)r--;
+ if(r-l<w*.3||b-t<h*.3)return c;const o=document.createElement('canvas');o.width=r-l+1;o.height=b-t+1;o.getContext('2d').drawImage(c,l,t,o.width,o.height,0,0,o.width,o.height);return o}
+async function pbkSide(file,trim){const im=await admReadImg(file);let src=trim?pbkTrim(im):im;let sw=src.naturalWidth||src.width,sh=src.naturalHeight||src.height;let w=Math.min(sw,1400),q=.93,url='';
+ for(let i=0;i<14;i++){const h=Math.round(w*sh/sw),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.imageSmoothingQuality='high';x.drawImage(src,0,0,w,h);url=c.toDataURL('image/jpeg',q);if(url.length<=PBK_SIDE_MAX)return url;if(q>.62)q-=.06;else w=Math.round(w*.88)}
  throw new Error('Image bahut bhari hai, chhoti image chunein')}
+async function pbkLoad(){const sn=await apFirestore.doc(PBK_DOC).get();return sn.exists?sn.data():{}}
+async function pbkSave(c){admOwnerCheck();const o={front:c.front||null,back:c.back||null,trim:c.trim!==false,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+ if(!o.front&&!o.back){await apFirestore.doc(PBK_DOC).delete();return}await apFirestore.doc(PBK_DOC).set(o)}
 async function admPbkTab(){
  A$('admBody').innerHTML='<div class="admCard"><p class="admHint">Load ho raha hai…</p></div>';
  if(!apFirestore)throw new Error('Firebase Firestore load nahi hua');
- const sn=await apFirestore.doc(PBK_DOC).get(),c=sn.exists?sn.data():null,has=!!(c&&c.img);
- A$('admBody').innerHTML=`<div class="admCard"><h3><span class="hi">📘</span>IPPB Passbook – Template</h3><p class="admHint">Yahan jo template upload karenge wahi sabhi users ke <b>IPPB Passbook</b> tool me lagega. Template <b>poore A4 page</b> ki image ho (aage + peeche dono card), bilkul abhi wale passbook jaise layout me — Name, Account No., CIF aur QR usi jagah par aate hain.</p>
- <p class="admHint">Abhi: <b>${has?'Admin ka template laga hua hai':'Built-in (purana) template chal raha hai'}</b>${has?' • '+Math.round(c.img.length/1024)+' KB':''}</p>
- ${has?`<div class="admThumbs" style="grid-template-columns:1fr"><div style="aspect-ratio:210/297;max-width:260px;margin:auto"><img src="${c.img}" alt=""></div></div>`:''}
- <label>${has?'Template badlein':'Naya template chunein'} (A4 page image)</label><input type="file" id="pbkFile" accept="image/*">
- <div class="admRow"><button type="button" class="go" id="pbkSave">⬆ Upload karein</button>${has?'<button type="button" class="danger" id="pbkDel">🗑 Hatayein (built-in par wapas)</button>':''}</div></div>`;
- A$('pbkSave').onclick=async()=>{try{admOwnerCheck();const f=A$('pbkFile').files[0];if(!f){admToast('Pehle image chunein',1);return}
-  const img=await pbkImg(f);await apFirestore.doc(PBK_DOC).set({img,name:f.name,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});admToast('✓ Passbook template lag gaya');admPbkTab()}catch(e){admToast('Upload nahi hua: '+(e.message||e),1)}};
- if(A$('pbkDel'))A$('pbkDel').onclick=async()=>{try{admOwnerCheck();if(!confirm('Admin ka template hata kar built-in par wapas jayein?'))return;await apFirestore.doc(PBK_DOC).delete();admToast('Template hata diya');admPbkTab()}catch(e){admToast('Error: '+(e.message||e),1)}};
+ const c=await pbkLoad(),trim=c.trim!==false,kb=x=>x?Math.round(x.length/1024)+' KB':'';
+ const side=(k,label)=>`<div class="admItem"><b>${label}</b><div class="admThumbs" style="grid-template-columns:1fr">${c[k]?`<div style="max-width:300px;margin:auto"><img src="${c[k]}" alt="" style="width:100%;border-radius:8px"></div>`:'<p class="admHint">Abhi built-in (purana) lag raha hai</p>'}</div>
+  <p class="admHint">${c[k]?'Admin ka laga hua • '+kb(c[k]):''}</p>
+  <div class="admRow"><label class="admBtn go" style="cursor:pointer">⬆ ${c[k]?label+' badlein':label+' upload karein'}<input type="file" accept="image/*" hidden data-pb="up" data-k="${k}"></label>${c[k]?`<button type="button" class="admBtn danger" data-pb="del" data-k="${k}">🗑 Hatayein</button>`:''}</div></div>`;
+ A$('admBody').innerHTML=`<div class="admCard"><h3><span class="hi">📘</span>IPPB Passbook – Front / Back</h3><p class="admHint">Front aur Back <b>alag-alag</b> upload karein. Image chunte hi wo apne aap passbook ke Front / Back ki jagah, usi size me lag jaati hai (Name, Account No., CIF aur QR usi purani jagah aate hain). Card ki image <b>abhi wale passbook card jaisi layout</b> me honi chahiye.</p>
+ <label style="display:flex;gap:10px;align-items:center;font-weight:800;color:#0b3d91;margin:10px 0"><input type="checkbox" id="pbkTrim" ${trim?'checked':''} style="width:22px;height:22px"> ✂️ Safed (white) kinara apne aap kaatein</label>
+ <p class="admHint">Tick ON ho to image ke charo taraf ka safed / khali hissa kat kar card usi size me fit hota hai. Tick ka asar <b>agli upload</b> se lagta hai.</p></div>
+ ${side('front','Front')}${side('back','Back')}
+ ${(c.front||c.back)?'<div class="admCard"><div class="admRow"><button type="button" class="admBtn danger" data-pb="all">🗑 Dono hatayein (built-in par wapas)</button></div></div>':''}`;
+ A$('pbkTrim').onchange=async e=>{try{admOwnerCheck();const cur=await pbkLoad();if(cur.front||cur.back){cur.trim=e.target.checked;await pbkSave(cur)}admToast(e.target.checked?'Kinara kaatna ON':'Kinara kaatna OFF')}catch(x){admToast('Error: '+(x.message||x),1)}}
 }
+async function admPbkAct(el){const k=el.dataset.k,act=el.dataset.pb;
+ try{admOwnerCheck();const c=await pbkLoad();
+  if(act==='up'){const f=el.files[0];if(!f)return;const trim=A$('pbkTrim').checked;admToast('Image lag rahi hai…');c[k]=await pbkSide(f,trim);c.trim=trim;await pbkSave(c);admToast('✓ '+(k==='front'?'Front':'Back')+' lag gaya — passbook me apne aap lag jayega');admPbkTab()}
+  else if(act==='del'){if(!confirm((k==='front'?'Front':'Back')+' hata dein?'))return;c[k]=null;await pbkSave(c);admToast('Hata diya');admPbkTab()}
+  else if(act==='all'){if(!confirm('Front aur Back dono hata kar built-in par wapas jayein?'))return;await apFirestore.doc(PBK_DOC).delete();admToast('Built-in par wapas');admPbkTab()}
+ }catch(e){admToast('Error: '+(e.message||e),1)}}
+A$('admBody').addEventListener('click',e=>{const b=e.target.closest('[data-pb]');if(b&&b.tagName!=='INPUT'&&admTab==='pbk')admPbkAct(b)});
+A$('admBody').addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('input[data-pb]')&&admTab==='pbk')admPbkAct(i)});
 
 /* ---------- 8) Admin tabs ko tile look dena ---------- */
 (function(){const ic=document.querySelectorAll('#admTabs button');ic.forEach(b=>{if(b.querySelector('.ti'))return;const t=b.textContent.trim(),m=t.match(/^(\S+)\s+(.*)$/);if(!m)return;b.innerHTML='<span class="ti">'+m[1]+'</span><span class="tl">'+m[2]+'</span><span class="tc">›</span>'})})();
