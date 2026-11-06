@@ -135,6 +135,10 @@
 .sbPmCard:has(input:checked){border-color:#86d9a5;background:#f0fdf4}
 .sbPmBox{max-height:none!important;padding:8px!important}
 </style>
+<style id="apAdmFoot">.apFoot{position:fixed;left:0;right:0;bottom:0;margin:0;z-index:2700;min-height:74px;padding:16px 10px calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:600;font-size:clamp(13px,4vw,21px);color:#fff;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 80' preserveAspectRatio='xMaxYMax slice'%3E%3Cpath d='M20 80C60 62 100 30 150 2V24C110 46 80 66 62 80Z' fill='%23ff9933'/%3E%3Cpath d='M62 80C80 66 110 46 150 24V46C120 62 100 72 96 80Z' fill='%23fff'/%3E%3Cpath d='M96 80C100 72 120 62 150 46V80Z' fill='%23138808'/%3E%3C/svg%3E") no-repeat right bottom/auto 100%,linear-gradient(110deg,#061d63,#0a38a6);border-radius:50% 50% 0 0/30px 30px 0 0;box-shadow:0 -4px 16px #00186040}
+.apFoot:before{content:'';position:absolute;left:0;right:0;top:-4px;height:30px;border-radius:50% 50% 0 0/100% 100% 0 0;border-top:3px solid #6db3ff;opacity:.9;pointer-events:none}
+.apFoot .fIn{display:flex;align-items:center;justify-content:center;gap:9px;padding-right:58px;text-align:left;line-height:1.15}
+.admContent{padding-bottom:110px!important}</style>
 </head><body>
 <div id="drawer" style="display:none"></div>
 <section id="adminView" class="toolView" aria-hidden="true"><div class="toolBar"><button id="admBack" type="button">← Back</button><span class="tbSep"></span><strong>⚙️ Admin Manager</strong><button id="admInst" type="button" style="margin-left:auto;display:none">📲 Install</button></div><div class="admContent">
@@ -1008,4 +1012,5 @@ async function admMpanAct(el){const D=window.apAdminData,L=D.manual||[],id=el.da
 A$('admBody').addEventListener('click',e=>{const b=e.target.closest('[data-mp]');if(b&&b.tagName!=='INPUT')admMpanAct(b)});
 A$('admBody').addEventListener('change',e=>{const b=e.target;if(b.matches&&b.matches('input[data-mp="img"]'))admMpanAct(b)});
 
-</script></body></html>
+</script><div class="apFoot"><span class="fIn"><svg width="32" height="36" viewBox="0 0 24 26" aria-hidden="true"><path d="M12 1l9 3.5v7c0 6-4 10.5-9 13-5-2.5-9-7-9-13v-7z" fill="#0b8a3a" stroke="#fff" stroke-width="1.6"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>All Card Services – Digital India</span></span></div>
+</body></html>
