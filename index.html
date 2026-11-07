@@ -437,7 +437,7 @@ async function admKisAct(el){const id=el.dataset.id,act=el.dataset.kx;
 
 /* ---------- DASHBOARD DESIGN (Firestore: publicConfig/dashboard) ---------- */
 const DASH_DOC='publicConfig/dashboard',DASH_MAX=900000;
-const DASH_TILES=[['aadhaar','Aadhaar Services','🪪'],['pan','PAN Card Services','▤'],['voter','Voter ID Services','🗳️'],['apaar','APAAR ID Services','🎓'],['ayushman','Ayushman Card','🌿'],['ippb','IPPB Passbook','🏦'],['print-manager','Print Manager','🖨️'],['ippb-atm','IPPB ATM Card','💳'],['abha','ABHA Card','🩺'],['eshram','E-Shram & Labour Card','👷'],['dl','Driving Licence & RC','🚘'],['kisan','Farmer / Kisan Services','🌾'],['passport','Passport Photo','📷'],['photoedit','Photo / PDF Text Editor','📝'],['interest','Interest Calculator Pro','🧮'],['noncreamy','RTPS DOCUMENT READY','📜']];
+const DASH_TILES=[['aadhaar','Aadhaar Services','🪪'],['pan','PAN Card Services','▤'],['voter','Voter ID Services','🗳️'],['apaar','APAAR ID Services','🎓'],['ayushman','Ayushman Card','🌿'],['ippb','IPPB Passbook','🏦'],['print-manager','Print Manager','🖨️'],['ippb-atm','IPPB ATM Card','💳'],['abha','ABHA Card','🩺'],['eshram','E-Shram & Labour Card','👷'],['dl','Driving Licence & RC','🚘'],['kisan','Farmer / Kisan Services','🌾'],['passport','Passport Photo','📷'],['photoedit','Photo / PDF Text Editor','📝'],['interest','Interest Calculator Pro','🧮'],['noncreamy','RTPS DOCUMENT READY','📜'],['sadi','SADI AND RESUME','💒']];
 let DASH=null;
 const dashBytes=()=>new Blob([JSON.stringify(DASH)]).size;
 async function dashLoad(){if(!apFirestore)throw new Error('Firebase Firestore load nahi hua');const sn=await apFirestore.doc(DASH_DOC).get(),d=sn.exists?(sn.data().data||{}):{};DASH={theme:d.theme==='image'?'image':'classic',imgs:(d.imgs&&typeof d.imgs==='object')?d.imgs:{}};return DASH}
@@ -464,8 +464,12 @@ const PP_FEATS=[['passport','📷 Passport Photo','Passport'],['bc_sign','📜 B
 /* purane records (jab feature save nahi hota tha) sab Passport Photo ke maane jaate hain */
 const ppFe=u=>{const f=Object.assign({},u.fe||{});const s=Object.values(f).reduce((a,b)=>a+(+b||0),0);f.passport=(f.passport||0)+Math.max(0,(u.n||0)-s);return f};
 const ppWhere=u=>{const f=ppFe(u);const t=PP_FEATS.filter(a=>f[a[0]]>0).map(a=>a[2]+' '+f[a[0]]).join(' • ');return t||'—'};
-const ppBreak=st=>{const tot=PP_FEATS.reduce((a,f)=>a+(st.fe[f[0]]||0),0)||1;
- return `<div style="margin-top:12px"><b>Kis cheez me use hua (alag-alag)</b><table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px">${PP_FEATS.map(f=>{const n=st.fe[f[0]]||0;return `<tr style="border-top:1px solid #e2e8f0"><td style="padding:7px 0">${f[1]}</td><td style="width:38%"><div style="background:#e2e8f0;border-radius:6px;height:8px"><div style="width:${Math.round(n*100/tot)}%;background:#0755c9;height:8px;border-radius:6px"></div></div></td><td style="text-align:right;width:56px"><b>${n}</b></td></tr>`}).join('')}</table></div>`};
+const ppBreak=st=>{
+ const g=k=>st.fe[k]||0;
+ const grp=[['📷 PASSPORT PHOTO',['passport']],['📄 RTPS DOCUMENT READY',['bc_sign','obc_sign','rtps_sign','rtps_photo']]];
+ const tot=PP_FEATS.reduce((a,f)=>a+g(f[0]),0)||1;
+ const row=f=>{const n=g(f[0]);return `<tr style="border-top:1px solid #e2e8f0"><td style="padding:7px 0 7px 8px">${f[1]}</td><td style="width:34%"><div style="background:#e2e8f0;border-radius:6px;height:8px"><div style="width:${Math.round(n*100/tot)}%;background:#0755c9;height:8px;border-radius:6px"></div></div></td><td style="text-align:right;width:56px"><b>${n}</b></td></tr>`};
+ return `<div style="margin-top:12px"><b>Kis cheez me use hua (alag-alag)</b><table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:6px">${grp.map(([t,ks])=>{const fs=ks.map(k=>PP_FEATS.find(f=>f[0]===k));const sub=fs.reduce((a,f)=>a+g(f[0]),0);return `<tr style="background:#f1f5f9"><td style="padding:8px;font-weight:700" colspan="2">${t}</td><td style="text-align:right;padding-right:0"><b>${sub}</b></td></tr>${fs.map(row).join('')}`}).join('')}</table></div>`};
 async function admPassTab(){
  A$('admBody').innerHTML='<div class="admCard"><p class="admHint">Load ho raha hai…</p></div>';
  if(!apFirestore)throw new Error('Firebase Firestore load nahi hua');
@@ -712,10 +716,10 @@ SB.waLink=(mobile,msg)=>{let m=String(mobile||'').replace(/\D/g,'');if(m.length=
 SB.copy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
 
 /* ---------- Access control: kaun sa user kaun sa section chala sakta hai ---------- */
-SB.SECS=[{k:'aadhaar',n:'🪪 Aadhaar Services'},{k:'pan',n:'▤ PAN Card Services',sub:[{k:'pan_uti',n:'UTI PAN'},{k:'pan_nsdl',n:'NSDL PAN'},{k:'pan_manual',n:'Manual PAN'}]},{k:'voter',n:'🗳️ Voter ID Services'},{k:'apaar',n:'🎓 APAAR ID Services'},{k:'ayushman',n:'🌿 Ayushman Card'},{k:'ippb',n:'🏦 IPPB Passbook'},{k:'ippb-atm',n:'💳 IPPB ATM Card'},{k:'print-manager',n:'🖨️ Print Manager'},{k:'abha',n:'ABHA Card (jald aayega)'},{k:'eshram',n:'E-Shram & Labour Card (jald aayega)'},{k:'dl',n:'Driving Licence & RC (jald aayega)'},{k:'farmer',n:'🌾 Farmer / Kisan Card'},{k:'passport',n:'📷 Passport Photo'},{k:'photoedit',n:'📝 Photo & PDF Text Editor'},{k:'interest',n:'🧮 Interest Calculator Pro'},{k:'noncreamy',n:'📜 RTPS DOCUMENT READY'}];
+SB.SECS=[{k:'aadhaar',n:'🪪 Aadhaar Services'},{k:'pan',n:'▤ PAN Card Services',sub:[{k:'pan_uti',n:'UTI PAN'},{k:'pan_nsdl',n:'NSDL PAN'},{k:'pan_manual',n:'Manual PAN'}]},{k:'voter',n:'🗳️ Voter ID Services'},{k:'apaar',n:'🎓 APAAR ID Services'},{k:'ayushman',n:'🌿 Ayushman Card'},{k:'ippb',n:'🏦 IPPB Passbook'},{k:'ippb-atm',n:'💳 IPPB ATM Card'},{k:'print-manager',n:'🖨️ Print Manager'},{k:'abha',n:'ABHA Card (jald aayega)'},{k:'eshram',n:'E-Shram & Labour Card (jald aayega)'},{k:'dl',n:'Driving Licence & RC (jald aayega)'},{k:'farmer',n:'🌾 Farmer / Kisan Card'},{k:'passport',n:'📷 Passport Photo'},{k:'photoedit',n:'📝 Photo & PDF Text Editor'},{k:'interest',n:'🧮 Interest Calculator Pro'},{k:'noncreamy',n:'📜 RTPS DOCUMENT READY'},{k:'sadi',n:'💒 SADI AND RESUME'}];
 SB.ALLK=SB.SECS.flatMap(x=>[x.k].concat((x.sub||[]).map(y=>y.k))).concat(['apaaredit']);
-SB.NEWK=['photoedit','interest'];SB.NEWK3=['noncreamy'];/* naye sections: purani saved list me bhi default ON (jab tak admin dobara save na kare) */
-SB.fixP=(l,v)=>{let r=l;if(!(v>=2))r=r.concat(SB.NEWK.filter(k=>!r.includes(k)));if(!(v>=3))r=r.concat(SB.NEWK3.filter(k=>!r.includes(k)));return r};
+SB.NEWK=['photoedit','interest'];SB.NEWK3=['noncreamy'];SB.NEWK4=['sadi'];/* naye sections: purani saved list me bhi default ON (jab tak admin dobara save na kare) */
+SB.fixP=(l,v)=>{let r=l;if(!(v>=2))r=r.concat(SB.NEWK.filter(k=>!r.includes(k)));if(!(v>=3))r=r.concat(SB.NEWK3.filter(k=>!r.includes(k)));if(!(v>=4))r=r.concat(SB.NEWK4.filter(k=>!r.includes(k)));return r};
 SB.defP=d=>{const s=(d&&d.settings)||{};return Array.isArray(s.defPerms)?SB.fixP(s.defPerms,s.defPermsV):SB.ALLK};
 SB.perms=(u,d)=>Array.isArray(u.perms)?SB.fixP(u.perms,u.permsV):SB.defP(d);
 SB.XPERMS=[{k:'editprofile',n:'✏️ Profile Details Edit (user apni naam/email khud badal sake)'},{k:'apaaredit',n:'🎓 APAAR ID: Details Edit option (card kat jane ke baad Edit Details dikhe)'}];
@@ -948,8 +952,8 @@ SB.act=async b=>{const a=b.dataset.sb,id=b.dataset.id;
   case 'pwmob':await SB.mutUser(id,u=>{u.ph=SB.hash(u.uid,u.uid);u.devs.forEach(x=>x.tok=null);SB.log(u,'Password = mobile number')},'✓ Password ab mobile number hai');break;
   case 'pmall':case 'pmnone':document.querySelectorAll('#sbModal .sbPerm').forEach(i=>i.checked=(a==='pmall'));break;
   case 'pmdef':{const d=await SB.get(),L=SB.defP(d);document.querySelectorAll('#sbModal .sbPerm').forEach(i=>i.checked=L.includes(i.value));break}
-  case 'pmsave':{const L=[...document.querySelectorAll('#sbModal .sbPerm:checked')].map(i=>i.value);await SB.mutUser(id,u=>{u.perms=L;u.permsV=3;SB.log(u,'Access badla: '+L.filter(k=>SB.SECS.some(x=>x.k===k)).length+' section')},'✓ Access save ho gaya');break}
-  case 'dpsave':{const L=[...document.querySelectorAll('#sbDefPerm .sbPerm:checked')].map(i=>i.value);await SB.tx(async d=>{d.settings.defPerms=L;d.settings.defPermsV=3});admToast('✓ Default access save ho gaya');break}
+  case 'pmsave':{const L=[...document.querySelectorAll('#sbModal .sbPerm:checked')].map(i=>i.value);await SB.mutUser(id,u=>{u.perms=L;u.permsV=4;SB.log(u,'Access badla: '+L.filter(k=>SB.SECS.some(x=>x.k===k)).length+' section')},'✓ Access save ho gaya');break}
+  case 'dpsave':{const L=[...document.querySelectorAll('#sbDefPerm .sbPerm:checked')].map(i=>i.value);await SB.tx(async d=>{d.settings.defPerms=L;d.settings.defPermsV=4});admToast('✓ Default access save ho gaya');break}
   case 'maxd':await SB.mutUser(id,u=>{u.maxDev=+b.dataset.n;if(u.devs.length>u.maxDev){u.devs.sort((a,c)=>(c.last||0)-(a.last||0));u.devs=u.devs.slice(0,u.maxDev)}SB.log(u,'Device limit = '+u.maxDev)},'✓ Device limit set ho gayi');break;
   case 'devdel':await SB.mutUser(id,u=>{u.devs=u.devs.filter(x=>x.id!==b.dataset.v);SB.log(u,'Admin ne ek device hataya')},'✓ Device hata diya');break;
   case 'devrst':if(!confirm('Device reset karein? User naye device se login kar payega (purana device logout ho jayega).'))return;
