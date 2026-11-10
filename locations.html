@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live Location — Admin</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<style>
+:root{--bg:#eef3f8;--card:#fff;--tx:#10202e;--mut:#5d6d7c;--bd:#d6e0ea;--ac:#0b5ed7}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 "Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",sans-serif}
+[hidden]{display:none!important}
+header{background:#0a2a78;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+header b{font-size:18px}
+header button{background:#fff;color:#0a2a78;border:0;border-radius:10px;padding:8px 14px;font:inherit;font-weight:700;cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:12px}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0}
+input{width:100%;font:inherit;padding:11px;border:1px solid var(--bd);border-radius:10px;margin:6px 0 10px}
+.btn{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer}
+.btn.alt{background:#fff;color:var(--ac);border:1px solid var(--ac)}
+.err{color:#b3261e;font-weight:600;margin-top:8px}
+.top{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.top input{flex:1;min-width:200px;margin:0}
+.cnt{color:var(--mut);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;margin-top:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.card h3{margin:0;font-size:16px}
+.card small{color:var(--mut)}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:700;margin:6px 0}
+.ok{background:#dff5e6;color:#12703a}.warn{background:#fff1d6;color:#9a5b00}.bad{background:#fde6e3;color:#b3261e}.off{background:#e6ebf0;color:#4a5b6a}
+.row{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:4px 0;border-bottom:1px dashed var(--bd)}
+.row:last-of-type{border-bottom:0}
+.row span{color:var(--mut)}.row b{text-align:right}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.acts .btn{padding:8px 12px;font-size:13.5px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:10;padding:10px}
+.mb{background:#fff;border-radius:14px;width:100%;max-width:760px;overflow:hidden}
+.mb .h{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.mb iframe{width:100%;height:60vh;border:0;display:block}
+.mb .f{padding:10px 14px;display:flex;gap:8px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header><b>📍 Live Location — Admin</b><button id="out" hidden>Logout</button></header>
+<div class="wrap">
+
+  <div class="box" id="login">
+    <b>Owner login</b>
+    <div style="color:var(--mut);font-size:13.5px;margin-top:2px">वही email और password जिससे आप Admin Panel में login करते हैं।</div>
+    <input id="em" type="email" placeholder="Owner email" autocomplete="username">
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password">
+    <button class="btn" id="go">Login</button>
+    <div class="err" id="err"></div>
+  </div>
+
+  <div id="app" hidden>
+    <div class="top">
+      <input id="q" placeholder="User ID / नाम से खोजें">
+      <span class="cnt" id="cnt"></span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="box" id="empty" hidden>अभी किसी user ने Location Sharing ON नहीं की है।</div>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="mb">
+    <div class="h"><b id="mt"></b><button class="btn alt" id="mx" type="button">✕ बंद करें</button></div>
+    <iframe id="mf" title="Map" loading="lazy"></iframe>
+    <div class="f"><a class="btn" id="mg" target="_blank" rel="noopener">Google Maps में खोलें</a><span class="cnt" id="ms"></span></div>
+  </div>
+</div>
+
+<script>
+var OWNER_UID='ofSt3V2PnDbFSVidk0T8aGpWjot2';
+firebase.initializeApp({apiKey:'AIzaSyDU8uqPNCren-qZlIy89gsj2w8aLhh3yMk',authDomain:'all-print-card.firebaseapp.com',projectId:'all-print-card',storageBucket:'all-print-card.firebasestorage.app',messagingSenderId:'206572139177',appId:'1:206572139177:web:63a489217cc1dccb366fb8'});
+var auth=firebase.auth(),db=firebase.firestore();
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
+var DATA={},NAMES={},unsub=null;
+
+$('go').onclick=function(){
+  $('err').textContent='';
+  auth.signInWithEmailAndPassword($('em').value.trim(),$('pw').value).catch(function(e){$('err').textContent='Login nahi hua: '+(e.code||e.message)});
+};
+$('pw').onkeydown=function(e){if(e.key==='Enter')$('go').click()};
+$('out').onclick=function(){auth.signOut()};
+
+auth.onAuthStateChanged(function(u){
+  if(unsub){unsub();unsub=null}
+  if(!u){$('login').hidden=false;$('app').hidden=true;$('out').hidden=true;return}
+  if(u.uid!==OWNER_UID){$('err').textContent='Ye page sirf Owner/Admin ke liye hai.';auth.signOut();return}
+  $('login').hidden=true;$('app').hidden=false;$('out').hidden=false;
+  db.collection('users').get().then(function(s){s.forEach(function(d){NAMES[d.id]=(d.data()||{}).name||''});render()}).catch(function(){});
+  unsub=db.collection('locations').onSnapshot(function(s){
+    DATA={};s.forEach(function(d){DATA[d.id]=d.data()});render();
+  },function(e){$('cnt').textContent='Data nahi aa raha: '+(e.code||e.message)});
+});
+
+function fmt(ms){
+  if(!ms)return '—';
+  var d=new Date(ms),p=function(n){return('0'+n).slice(-2)};
+  return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+}
+function ago(ms){
+  if(!ms)return '';
+  var s=Math.max(0,Math.round((Date.now()-ms)/1000));
+  return s<60?s+' sec pehle':s<3600?Math.floor(s/60)+' min pehle':s<86400?Math.floor(s/3600)+' ghante pehle':Math.floor(s/86400)+' din pehle';
+}
+function status(d){
+  if(!d.on)return{t:'Sharing OFF',c:'off'};
+  if(d.st==='gps')return{t:'GPS OFF (aakhri known location)',c:'warn'};
+  if(d.st==='perm')return{t:'Permission OFF',c:'bad'};
+  if(Date.now()-(d.at||0)<6*60000)return{t:'LIVE',c:'ok'};
+  return{t:'Update ruka hua (internet/app band)',c:'bad'};
+}
+function render(){
+  var q=($('q').value||'').trim().toLowerCase();
+  var ids=Object.keys(DATA).filter(function(id){return !q||id.toLowerCase().indexOf(q)>=0||String(NAMES[id]||'').toLowerCase().indexOf(q)>=0});
+  ids.sort(function(a,b){return(DATA[b].at||0)-(DATA[a].at||0)});
+  var live=ids.filter(function(id){return status(DATA[id]).c==='ok'}).length;
+  $('cnt').textContent=ids.length+' user • '+live+' LIVE';
+  $('empty').hidden=Object.keys(DATA).length>0;
+  var g=$('grid');g.innerHTML='';
+  ids.forEach(function(id){
+    var d=DATA[id],s=status(d),has=d.lat!=null&&d.lng!=null;
+    var c=document.createElement('div');c.className='card';
+    c.innerHTML='<h3>'+esc(NAMES[id]||'—')+'</h3><small>User ID: <b>'+esc(id)+'</b></small><br>'
+     +'<span class="badge '+s.c+'">'+s.t+'</span>'
+     +'<div class="row"><span>Live Location</span><b>'+(has?d.lat.toFixed(5)+', '+d.lng.toFixed(5):'—')+'</b></div>'
+     +'<div class="row"><span>Accuracy</span><b>'+(d.acc!=null?'± '+d.acc+' m':'—')+'</b></div>'
+     +'<div class="row"><span>Last Updated</span><b>'+esc(fmt(d.at))+'<br><small>'+esc(ago(d.at))+'</small></b></div>'
+     +(has?'<div class="acts"><button class="btn" type="button">🗺 Map</button><a class="btn alt" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+d.lat+','+d.lng+'">Google Maps</a></div>':'');
+    var b=c.querySelector('button');if(b)b.onclick=function(){openMap(id)};
+    g.appendChild(c);
+  });
+}
+function openMap(id){
+  var d=DATA[id];if(!d||d.lat==null)return;
+  var la=d.lat,ln=d.lng,e=0.004;
+  $('mt').textContent=(NAMES[id]||'User')+' • '+id;
+  $('mf').src='https://www.openstreetmap.org/export/embed.html?bbox='+(ln-e)+'%2C'+(la-e*0.6)+'%2C'+(ln+e)+'%2C'+(la+e*0.6)+'&layer=mapnik&marker='+la+'%2C'+ln;
+  $('mg').href='https://www.google.com/maps?q='+la+','+ln;
+  $('ms').textContent='Last Updated: '+fmt(d.at);
+  $('modal').hidden=false;
+}
+$('mx').onclick=function(){$('modal').hidden=true;$('mf').src='about:blank'};
+$('modal').onclick=function(e){if(e.target===this)$('mx').click()};
+$('q').oninput=render;
+setInterval(function(){if(!$('app').hidden)render()},20000);
+</script>
+</body>
+</html>
