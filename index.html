@@ -139,7 +139,7 @@
 <div id="drawer" style="display:none"></div>
 <section id="adminView" class="toolView" aria-hidden="true"><div class="toolBar"><button id="admBack" type="button">← Back</button><span class="tbSep"></span><strong>⚙️ Admin Manager</strong><button id="admInst" type="button" style="margin-left:auto;display:none">📲 Install</button></div><div class="admContent">
 <div id="admGate" class="admCard" hidden><h3 id="admGateTitle">Owner Login</h3><p class="admHint">Owner email fixed hai. Admin panel kholne ke liye password daalein.</p><label for="admEmail">Owner Email</label><input type="text" id="admEmail" value="kchandramohan6205@gmail.com" readonly autocomplete="username" style="background:#f1f5f9;color:#475569"><label for="admPin">Password</label><input type="password" id="admPin" placeholder="Firebase password" autocomplete="current-password"><div id="admGateMsg" class="admHint" style="color:#b91c1c;font-weight:700"></div><div class="admRow"><button type="button" class="go" id="admGateBtn">Login</button></div></div>
-<div id="admMain" hidden><div class="admTabs" id="admTabs"><button type="button" data-tab="sbr">🧾 Requests</button><button type="button" data-tab="sbu">👥 Users</button><button type="button" data-tab="sbm">💬 Messages</button><button type="button" data-tab="sbp">💎 Plans &amp; QR</button><button type="button" data-tab="sbs">⚙️ Sub Settings</button><button type="button" data-tab="mpan">✍️ Manual PAN</button><button type="button" data-tab="crop">✂️ Crop Setup</button><button type="button" data-tab="aad">🪪 Aadhaar Templates</button><button type="button" data-tab="atm">💳 ATM Templates</button><button type="button" data-tab="kis">🌾 Kisan Templates</button><button type="button" data-tab="pass">📷 Passport Photo</button><button type="button" data-tab="pbk">📘 Passbook Template</button><button type="button" data-tab="dash">🏠 Dashboard</button><button type="button" data-tab="pub">📦 Publish / Backup</button></div><div id="admBody"></div></div>
+<div id="admMain" hidden><div class="admTabs" id="admTabs"><button type="button" data-tab="sbr">🧾 Requests</button><button type="button" data-tab="sbu">👥 Users</button><button type="button" data-tab="loc">📍 Live Location</button><button type="button" data-tab="sbm">💬 Messages</button><button type="button" data-tab="sbp">💎 Plans &amp; QR</button><button type="button" data-tab="sbs">⚙️ Sub Settings</button><button type="button" data-tab="mpan">✍️ Manual PAN</button><button type="button" data-tab="crop">✂️ Crop Setup</button><button type="button" data-tab="aad">🪪 Aadhaar Templates</button><button type="button" data-tab="atm">💳 ATM Templates</button><button type="button" data-tab="kis">🌾 Kisan Templates</button><button type="button" data-tab="pass">📷 Passport Photo</button><button type="button" data-tab="pbk">📘 Passbook Template</button><button type="button" data-tab="dash">🏠 Dashboard</button><button type="button" data-tab="pub">📦 Publish / Backup</button></div><div id="admBody"></div></div>
 </div></section>
 <style>
 .admContent{padding:14px;overflow:auto;flex:1;background:#f3f6fb;color:#172033;font-size:15px}
@@ -278,7 +278,7 @@ async function admGateGo(){
  }
 }
 async function admForgot(e){e.preventDefault();if(!confirm('PIN reset karne par is browser ka saved admin data (crop, templates) bhi hat jayega. Website wali admin-data.json ka data nahi hatega. Reset karein?'))return;try{await admPinClear();await admDel('data')}catch(x){}window.apAdminData=admEmpty();window.apAdminSource='default';admUnlocked=false;admToast('✓ Reset ho gaya. Ab naya PIN set karein.');await admGate()}
-function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,kis:admKisTab,pass:admPassTab,pbk:admPbkTab,dash:admDashTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
+function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));if(window.__locUnsub){try{window.__locUnsub()}catch(e){}window.__locUnsub=null}if(window.__locTimer){clearInterval(window.__locTimer);window.__locTimer=null}window.__locMapId=null;admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,loc:admLocTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,kis:admKisTab,pass:admPassTab,pbk:admPbkTab,dash:admDashTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
 
 /* ---------- image helpers ---------- */
 function admReadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Image open nahi hui'))};im.src=u})}
@@ -437,7 +437,7 @@ async function admKisAct(el){const id=el.dataset.id,act=el.dataset.kx;
 
 /* ---------- DASHBOARD DESIGN (Firestore: publicConfig/dashboard) ---------- */
 const DASH_DOC='publicConfig/dashboard',DASH_MAX=900000;
-const DASH_TILES=[['aadhaar','Aadhaar Services','🪪'],['pan','PAN Card Services','▤'],['voter','Voter ID Services','🗳️'],['apaar','APAAR ID Services','🎓'],['ayushman','Ayushman Card','🌿'],['ippb','IPPB Passbook','🏦'],['print-manager','Print Manager','🖨️'],['ippb-atm','IPPB ATM Card','💳'],['abha','ABHA Card','🩺'],['eshram','E-Shram & Labour Card','👷'],['dl','Driving Licence & RC','🚘'],['kisan','Farmer / Kisan Services','🌾'],['passport','Passport Photo','📷'],['photoedit','Photo / PDF Text Editor','📝'],['interest','Interest Calculator Pro','🧮'],['noncreamy','RTPS DOCUMENT READY','📜'],['sadi','SADI AND RESUME','💒']];
+const DASH_TILES=[['aadhaar','Aadhaar Services','🪪'],['pan','PAN Card Services','▤'],['voter','Voter ID Services','🗳️'],['apaar','APAAR ID Services','🎓'],['ayushman','Ayushman Card','🌿'],['ippb','IPPB Passbook','🏦'],['print-manager','Print Manager','🖨️'],['ippb-atm','IPPB ATM Card','💳'],['abha','ABHA Card','🩺'],['eshram','E-Shram & Labour Card','👷'],['dl','Driving Licence & RC','🚘'],['kisan','Farmer / Kisan Services','🌾'],['passport','Passport Photo','📷'],['photoedit','Photo / PDF Text Editor','📝'],['interest','Interest Calculator Pro','🧮'],['noncreamy','RTPS DOCUMENT READY','📜'],['sadi','SADI AND RESUME','💒'],['bill','BILL GENERATE','🧾'],['loc','LOCATION SHARING','📍']];
 let DASH=null;
 const dashBytes=()=>new Blob([JSON.stringify(DASH)]).size;
 async function dashLoad(){if(!apFirestore)throw new Error('Firebase Firestore load nahi hua');const sn=await apFirestore.doc(DASH_DOC).get(),d=sn.exists?(sn.data().data||{}):{};DASH={theme:d.theme==='image'?'image':'classic',imgs:(d.imgs&&typeof d.imgs==='object')?d.imgs:{}};return DASH}
@@ -540,6 +540,94 @@ async function admPbkAct(el){const k=el.dataset.k,act=el.dataset.pb;
  }catch(e){admToast('Error: '+(e.message||e),1)}}
 A$('admBody').addEventListener('click',e=>{const b=e.target.closest('[data-pb]');if(b&&b.tagName!=='INPUT'&&admTab==='pbk')admPbkAct(b)});
 A$('admBody').addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('input[data-pb]')&&admTab==='pbk')admPbkAct(i)});
+
+/* ---------- 📍 LIVE LOCATION (Firestore: locations/{mobile}) ---------- */
+function admLocFmt(ms){if(!ms)return '—';const d=new Date(ms),p=n=>('0'+n).slice(-2);return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}
+function admLocAgo(ms){if(!ms)return '';const s=Math.max(0,Math.round((Date.now()-ms)/1000));return s<60?s+' sec pehle':s<3600?Math.floor(s/60)+' min pehle':s<86400?Math.floor(s/3600)+' ghante pehle':Math.floor(s/86400)+' din pehle'}
+function admLocStatus(d){
+ if(!d.on)return{t:'Sharing OFF',bg:'#e2e8f0',c:'#475569'};
+ if(d.st==='gps')return{t:'GPS OFF (aakhri known location)',bg:'#fef3c7',c:'#92400e'};
+ if(d.st==='perm')return{t:'Permission OFF',bg:'#fee2e2',c:'#b91c1c'};
+ if(Date.now()-(d.at||0)<6*60000)return{t:'LIVE',bg:'#dcfce7',c:'#166534'};
+ return{t:'Update ruka hua (internet / phone band)',bg:'#fee2e2',c:'#b91c1c'};
+}
+function admLocBat(d){
+ if(d.bat==null)return '—';
+ const c=d.bat<=15?'#b91c1c':d.bat<=35?'#b45309':'#166534';
+ return '<b style="color:'+c+'">'+(d.chg?'⚡ ':'🔋 ')+d.bat+'%</b>';
+}
+function admLocMapUrl(la,ln){const e=0.004;return 'https://www.openstreetmap.org/export/embed.html?bbox='+(ln-e)+'%2C'+(la-e*0.6)+'%2C'+(ln+e)+'%2C'+(la+e*0.6)+'&layer=mapnik&marker='+la+'%2C'+ln}
+function admLocMap(id,d,name,live){
+ if(!d||d.lat==null)return;
+ const old=document.getElementById('locMapOv');if(old)old.remove();
+ window.__locMapId=live?id:null;
+ const o=document.createElement('div');o.id='locMapOv';
+ o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:10px';
+ o.innerHTML='<div style="background:#fff;border-radius:14px;width:100%;max-width:760px;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #e2e8f0"><b>'+(live?'🔴 LIVE • ':'📌 ')+pmEsc((name||'User')+' • '+id)+'</b><button type="button" class="admBtn" id="locMapX">✕ Band karein</button></div><iframe id="locMapF" title="Map" style="width:100%;height:60vh;border:0;display:block" src="'+admLocMapUrl(d.lat,d.lng)+'"></iframe><div style="padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><a class="admBtn" id="locMapG" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+d.lat+','+d.lng+'">Google Maps me kholein</a><span class="admHint" id="locMapI"></span></div></div>';
+ document.body.appendChild(o);
+ const close=()=>{window.__locMapId=null;o.remove()};
+ o.onclick=ev=>{if(ev.target===o)close()};
+ document.getElementById('locMapX').onclick=close;
+ admLocMapInfo(d);
+}
+function admLocMapInfo(d){const i=document.getElementById('locMapI');if(i)i.innerHTML='Last Updated: '+pmEsc(admLocFmt(d.at))+' &nbsp;|&nbsp; Battery: '+admLocBat(d)}
+function admLocMapFollow(DATA){
+ const id=window.__locMapId;if(!id)return;
+ const d=DATA[id],f=document.getElementById('locMapF');
+ if(!d||!f||d.lat==null)return;
+ const u=admLocMapUrl(d.lat,d.lng);
+ if(f.dataset.u!==u){f.dataset.u=u;f.src=u;const g=document.getElementById('locMapG');if(g)g.href='https://www.google.com/maps?q='+d.lat+','+d.lng}
+ admLocMapInfo(d);
+}
+function admLocCards(DATA,NAMES,q,live){
+ const ids=Object.keys(DATA).filter(id=>!q||id.toLowerCase().indexOf(q)>=0||String(NAMES[id]||'').toLowerCase().indexOf(q)>=0);
+ ids.sort((a,b)=>(DATA[b].at||0)-(DATA[a].at||0));
+ if(!ids.length)return '<div class="admCard"><p class="admHint">'+(Object.keys(DATA).length?'Koi user nahi mila.':'Abhi kisi user ne Location Sharing allow nahi ki hai.')+'</p></div>';
+ return ids.map(id=>{
+  const d=DATA[id],st=admLocStatus(d),has=d.lat!=null&&d.lng!=null;
+  return '<div class="admCard"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+pmEsc(NAMES[id]||'—')+'</b><div class="admHint">User ID: <b>'+pmEsc(id)+'</b></div></div><div><span style="display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:13px;background:'+st.bg+';color:'+st.c+'">'+st.t+'</span></div></div>'
+   +'<div class="admHint"><b>'+(live?'Live Location':'Current Location')+':</b> '+(has?d.lat.toFixed(5)+', '+d.lng.toFixed(5)+(d.acc!=null?' (± '+d.acc+' m)':''):'—')+'</div>'
+   +'<div class="admHint"><b>Battery:</b> '+admLocBat(d)+'</div>'
+   +'<div class="admHint"><b>Last Updated:</b> '+pmEsc(admLocFmt(d.at))+' <span style="color:#64748b">('+pmEsc(admLocAgo(d.at))+')</span></div>'
+   +(has?'<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="admBtn" data-lm="'+pmEsc(id)+'">'+(live?'🔴 Live Map':'🗺 Map')+'</button><a class="admBtn" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+d.lat+','+d.lng+'">Google Maps</a></div>':'')
+   +'</div>';
+ }).join('');
+}
+async function admLocTab(){
+ const NAMES={};let DATA={},mode='';
+ const btn=(m,t)=>'<button type="button" class="admBtn" data-lmode="'+m+'" style="padding:12px 18px;font-weight:700">'+t+'</button>';
+ A$('admBody').innerHTML='<div class="admCard"><h3>📍 Location</h3><p class="admHint">Jis-jis user ne <b>Location Sharing allow (ON)</b> kiya hai uski location dekhne ke liye neeche chunein. Location tab tak aati rehti hai jab tak user ka sharing ON hai (app band ho tab bhi, notification ke sath). OFF karte hi user ki location yahan se hat jaati hai.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0">'+btn('cur','📌 Current')+btn('live','🔴 Live')+'</div><div id="locHint" class="admHint">Current = abhi ki aakhri location (ek baar). Live = lagataar badalti location, battery % ke sath.</div><input type="search" id="locQ" placeholder="User ID / naam se khojein" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin-top:6px" hidden><div id="locCnt" class="admHint"></div></div><div id="locList"></div>';
+ try{const d=await SB.get();(d.users||[]).forEach(u=>{NAMES[u.uid]=u.name||''})}catch(e){}
+ const stop=()=>{if(window.__locUnsub){try{window.__locUnsub()}catch(e){}window.__locUnsub=null}if(window.__locTimer){clearInterval(window.__locTimer);window.__locTimer=null}window.__locMapId=null};
+ const draw=()=>{
+  const list=A$('locList');if(!list)return;
+  const q=((A$('locQ')||{}).value||'').trim().toLowerCase();
+  const ids=Object.keys(DATA);
+  const live=ids.filter(id=>admLocStatus(DATA[id]).t==='LIVE').length;
+  A$('locCnt').textContent=ids.length+' user'+(mode==='live'?' • '+live+' LIVE':'');
+  list.innerHTML=admLocCards(DATA,NAMES,q,mode==='live');
+ };
+ const pick=m=>{
+  stop();mode=m;DATA={};
+  document.querySelectorAll('[data-lmode]').forEach(b=>{b.style.outline=b.dataset.lmode===m?'3px solid #0b5ed7':'none'});
+  A$('locQ').hidden=false;
+  A$('locHint').textContent=m==='live'?'🔴 Live chal raha hai — naye updates apne-aap aate hain (battery % ke sath).':'📌 Abhi ki aakhri location (sirf unki jinhone sharing ON ki hai).';
+  A$('locCnt').textContent='Load ho raha hai…';
+  const col=apFirestore.collection('locations').where('on','==',true);
+  const err=e=>{const c=A$('locCnt');if(c)c.textContent='Data nahi aa raha: '+(e&&e.code==='permission-denied'?'Firestore Rules me locations ka rule publish karein':(e.message||e))};
+  if(m==='live'){
+   window.__locUnsub=col.onSnapshot(snap=>{DATA={};snap.forEach(x=>{DATA[x.id]=x.data()});draw();admLocMapFollow(DATA)},err);
+   window.__locTimer=setInterval(draw,15000);
+  }else{
+   col.get().then(snap=>{DATA={};snap.forEach(x=>{DATA[x.id]=x.data()});draw()}).catch(err);
+  }
+ };
+ A$('admBody').onclick=e=>{
+  const m=e.target.closest('[data-lmode]');if(m){pick(m.dataset.lmode);return}
+  const b=e.target.closest('[data-lm]');if(b){const id=b.dataset.lm;admLocMap(id,DATA[id],NAMES[id],mode==='live')}
+ };
+ A$('locQ').oninput=draw;
+}
 
 /* ---------- 8) Admin tabs ko tile look dena ---------- */
 (function(){const ic=document.querySelectorAll('#admTabs button');ic.forEach(b=>{if(b.querySelector('.ti'))return;const t=b.textContent.trim(),m=t.match(/^(\S+)\s+(.*)$/);if(!m)return;b.innerHTML='<span class="ti">'+m[1]+'</span><span class="tl">'+m[2]+'</span><span class="tc">›</span>'})})();
@@ -716,10 +804,10 @@ SB.waLink=(mobile,msg)=>{let m=String(mobile||'').replace(/\D/g,'');if(m.length=
 SB.copy=async t=>{try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}a.remove();return ok}};
 
 /* ---------- Access control: kaun sa user kaun sa section chala sakta hai ---------- */
-SB.SECS=[{k:'aadhaar',n:'🪪 Aadhaar Services'},{k:'pan',n:'▤ PAN Card Services',sub:[{k:'pan_uti',n:'UTI PAN'},{k:'pan_nsdl',n:'NSDL PAN'},{k:'pan_manual',n:'Manual PAN'}]},{k:'voter',n:'🗳️ Voter ID Services'},{k:'apaar',n:'🎓 APAAR ID Services'},{k:'ayushman',n:'🌿 Ayushman Card'},{k:'ippb',n:'🏦 IPPB Passbook'},{k:'ippb-atm',n:'💳 IPPB ATM Card'},{k:'print-manager',n:'🖨️ Print Manager'},{k:'abha',n:'ABHA Card (jald aayega)'},{k:'eshram',n:'E-Shram & Labour Card (jald aayega)'},{k:'dl',n:'Driving Licence & RC (jald aayega)'},{k:'farmer',n:'🌾 Farmer / Kisan Card'},{k:'passport',n:'📷 Passport Photo'},{k:'photoedit',n:'📝 Photo & PDF Text Editor'},{k:'interest',n:'🧮 Interest Calculator Pro'},{k:'noncreamy',n:'📜 RTPS DOCUMENT READY'},{k:'sadi',n:'💒 SADI AND RESUME'}];
+SB.SECS=[{k:'aadhaar',n:'🪪 Aadhaar Services'},{k:'pan',n:'▤ PAN Card Services',sub:[{k:'pan_uti',n:'UTI PAN'},{k:'pan_nsdl',n:'NSDL PAN'},{k:'pan_manual',n:'Manual PAN'}]},{k:'voter',n:'🗳️ Voter ID Services'},{k:'apaar',n:'🎓 APAAR ID Services'},{k:'ayushman',n:'🌿 Ayushman Card'},{k:'ippb',n:'🏦 IPPB Passbook'},{k:'ippb-atm',n:'💳 IPPB ATM Card'},{k:'print-manager',n:'🖨️ Print Manager'},{k:'abha',n:'ABHA Card (jald aayega)'},{k:'eshram',n:'E-Shram & Labour Card (jald aayega)'},{k:'dl',n:'Driving Licence & RC (jald aayega)'},{k:'farmer',n:'🌾 Farmer / Kisan Card'},{k:'passport',n:'📷 Passport Photo'},{k:'photoedit',n:'📝 Photo & PDF Text Editor'},{k:'interest',n:'🧮 Interest Calculator Pro'},{k:'noncreamy',n:'📜 RTPS DOCUMENT READY'},{k:'sadi',n:'💒 SADI AND RESUME'},{k:'bill',n:'🧾 BILL GENERATE'},{k:'loc',n:'📍 LOCATION SHARING'}];
 SB.ALLK=SB.SECS.flatMap(x=>[x.k].concat((x.sub||[]).map(y=>y.k))).concat(['apaaredit']);
-SB.NEWK=['photoedit','interest'];SB.NEWK3=['noncreamy'];SB.NEWK4=['sadi'];/* naye sections: purani saved list me bhi default ON (jab tak admin dobara save na kare) */
-SB.fixP=(l,v)=>{let r=l;if(!(v>=2))r=r.concat(SB.NEWK.filter(k=>!r.includes(k)));if(!(v>=3))r=r.concat(SB.NEWK3.filter(k=>!r.includes(k)));if(!(v>=4))r=r.concat(SB.NEWK4.filter(k=>!r.includes(k)));return r};
+SB.NEWK=['photoedit','interest'];SB.NEWK3=['noncreamy'];SB.NEWK4=['sadi'];SB.NEWK5=['bill'];SB.NEWK6=['loc'];/* naye sections: purani saved list me bhi default ON (jab tak admin dobara save na kare) */
+SB.fixP=(l,v)=>{let r=l;if(!(v>=2))r=r.concat(SB.NEWK.filter(k=>!r.includes(k)));if(!(v>=3))r=r.concat(SB.NEWK3.filter(k=>!r.includes(k)));if(!(v>=4))r=r.concat(SB.NEWK4.filter(k=>!r.includes(k)));if(!(v>=5))r=r.concat(SB.NEWK5.filter(k=>!r.includes(k)));if(!(v>=6))r=r.concat(SB.NEWK6.filter(k=>!r.includes(k)));return r};
 SB.defP=d=>{const s=(d&&d.settings)||{};return Array.isArray(s.defPerms)?SB.fixP(s.defPerms,s.defPermsV):SB.ALLK};
 SB.perms=(u,d)=>Array.isArray(u.perms)?SB.fixP(u.perms,u.permsV):SB.defP(d);
 SB.XPERMS=[{k:'editprofile',n:'✏️ Profile Details Edit (user apni naam/email khud badal sake)'},{k:'apaaredit',n:'🎓 APAAR ID: Details Edit option (card kat jane ke baad Edit Details dikhe)'}];
@@ -952,8 +1040,8 @@ SB.act=async b=>{const a=b.dataset.sb,id=b.dataset.id;
   case 'pwmob':await SB.mutUser(id,u=>{u.ph=SB.hash(u.uid,u.uid);u.devs.forEach(x=>x.tok=null);SB.log(u,'Password = mobile number')},'✓ Password ab mobile number hai');break;
   case 'pmall':case 'pmnone':document.querySelectorAll('#sbModal .sbPerm').forEach(i=>i.checked=(a==='pmall'));break;
   case 'pmdef':{const d=await SB.get(),L=SB.defP(d);document.querySelectorAll('#sbModal .sbPerm').forEach(i=>i.checked=L.includes(i.value));break}
-  case 'pmsave':{const L=[...document.querySelectorAll('#sbModal .sbPerm:checked')].map(i=>i.value);await SB.mutUser(id,u=>{u.perms=L;u.permsV=4;SB.log(u,'Access badla: '+L.filter(k=>SB.SECS.some(x=>x.k===k)).length+' section')},'✓ Access save ho gaya');break}
-  case 'dpsave':{const L=[...document.querySelectorAll('#sbDefPerm .sbPerm:checked')].map(i=>i.value);await SB.tx(async d=>{d.settings.defPerms=L;d.settings.defPermsV=4});admToast('✓ Default access save ho gaya');break}
+  case 'pmsave':{const L=[...document.querySelectorAll('#sbModal .sbPerm:checked')].map(i=>i.value);await SB.mutUser(id,u=>{u.perms=L;u.permsV=6;SB.log(u,'Access badla: '+L.filter(k=>SB.SECS.some(x=>x.k===k)).length+' section')},'✓ Access save ho gaya');break}
+  case 'dpsave':{const L=[...document.querySelectorAll('#sbDefPerm .sbPerm:checked')].map(i=>i.value);await SB.tx(async d=>{d.settings.defPerms=L;d.settings.defPermsV=6});admToast('✓ Default access save ho gaya');break}
   case 'maxd':await SB.mutUser(id,u=>{u.maxDev=+b.dataset.n;if(u.devs.length>u.maxDev){u.devs.sort((a,c)=>(c.last||0)-(a.last||0));u.devs=u.devs.slice(0,u.maxDev)}SB.log(u,'Device limit = '+u.maxDev)},'✓ Device limit set ho gayi');break;
   case 'devdel':await SB.mutUser(id,u=>{u.devs=u.devs.filter(x=>x.id!==b.dataset.v);SB.log(u,'Admin ne ek device hataya')},'✓ Device hata diya');break;
   case 'devrst':if(!confirm('Device reset karein? User naye device se login kar payega (purana device logout ho jayega).'))return;
