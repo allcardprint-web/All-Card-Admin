@@ -278,7 +278,7 @@ async function admGateGo(){
  }
 }
 async function admForgot(e){e.preventDefault();if(!confirm('PIN reset karne par is browser ka saved admin data (crop, templates) bhi hat jayega. Website wali admin-data.json ka data nahi hatega. Reset karein?'))return;try{await admPinClear();await admDel('data')}catch(x){}window.apAdminData=admEmpty();window.apAdminSource='default';admUnlocked=false;admToast('✓ Reset ho gaya. Ab naya PIN set karein.');await admGate()}
-function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));if(window.__locUnsub){try{window.__locUnsub()}catch(e){}window.__locUnsub=null}if(window.__locTimer){clearInterval(window.__locTimer);window.__locTimer=null}window.__locMapId=null;admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,loc:admLocTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,kis:admKisTab,pass:admPassTab,pbk:admPbkTab,dash:admDashTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
+function admRender(){setTimeout(()=>{window.subsBadge&&window.subsBadge()},0);document.querySelectorAll('#admTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===admTab));if(window.__locUnsub){try{window.__locUnsub()}catch(e){}window.__locUnsub=null}if(window.__locUnsub2){try{window.__locUnsub2()}catch(e){}window.__locUnsub2=null}if(window.__locTimer){clearInterval(window.__locTimer);window.__locTimer=null}window.__locMapId=null;window.__locAuto=null;admDestroyCrop();const __r=({sbr:subsReqTab,sbu:subsUsersTab,loc:admLocTab,sbm:subsMsgTab,sbp:subsPlansTab,sbs:subsSetTab,mpan:admMpanTab,crop:admCropTab,aad:admAadTab,atm:admAtmTab,kis:admKisTab,pass:admPassTab,pbk:admPbkTab,dash:admDashTab,pub:admPubTab})[admTab]();if(__r&&__r.catch)__r.catch(e=>{const m=(e&&e.code==='permission-denied')?'Firestore Rules abhi publish nahi hue ya owner login nahi hai. firestore.rules ko Firebase Console > Firestore > Rules me paste karke Publish karein.':(e.message||String(e));A$('admBody').innerHTML='<div class="admCard"><h3>⚠️ Data load nahi hua</h3><p class="admHint">'+pmEsc(m)+'</p><p class="admHint"><b>Technical:</b> '+pmEsc((e&&e.coll?e.coll+' | ':'')+(e&&e.code||'')+' | '+(e&&e.message||''))+'</p></div>'})}
 
 /* ---------- image helpers ---------- */
 function admReadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('Image open nahi hui'))};im.src=u})}
@@ -541,15 +541,20 @@ async function admPbkAct(el){const k=el.dataset.k,act=el.dataset.pb;
 A$('admBody').addEventListener('click',e=>{const b=e.target.closest('[data-pb]');if(b&&b.tagName!=='INPUT'&&admTab==='pbk')admPbkAct(b)});
 A$('admBody').addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('input[data-pb]')&&admTab==='pbk')admPbkAct(i)});
 
-/* ---------- 📍 LIVE LOCATION (Firestore: locations/{mobile}) ---------- */
+/* ---------- 📍 LOCATION (Firestore: locations/{mobile} + locCmd/{mobile}) ---------- */
 function admLocFmt(ms){if(!ms)return '—';const d=new Date(ms),p=n=>('0'+n).slice(-2);return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())}
 function admLocAgo(ms){if(!ms)return '';const s=Math.max(0,Math.round((Date.now()-ms)/1000));return s<60?s+' sec pehle':s<3600?Math.floor(s/60)+' min pehle':s<86400?Math.floor(s/3600)+' ghante pehle':Math.floor(s/86400)+' din pehle'}
 function admLocStatus(d){
+ const now=Date.now();
  if(!d.on)return{t:'Sharing OFF',bg:'#e2e8f0',c:'#475569'};
- if(d.st==='gps')return{t:'GPS OFF (aakhri known location)',bg:'#fef3c7',c:'#92400e'};
  if(d.st==='perm')return{t:'Permission OFF',bg:'#fee2e2',c:'#b91c1c'};
- if(Date.now()-(d.at||0)<6*60000)return{t:'LIVE',bg:'#dcfce7',c:'#166534'};
- return{t:'Update ruka hua (internet / phone band)',bg:'#fee2e2',c:'#b91c1c'};
+ if(d.st==='gps')return{t:'GPS OFF (aakhri known location)',bg:'#fef3c7',c:'#92400e'};
+ if(d.lv&&d.lv>now){
+  const m=Math.max(1,Math.ceil((d.lv-now)/60000));
+  return (now-(d.at||0)<120000)?{t:'🔴 LIVE • '+m+' min baaki',bg:'#dcfce7',c:'#166534'}:{t:'Live: update ruka hua • '+m+' min baaki',bg:'#fee2e2',c:'#b91c1c'};
+ }
+ if(d.st==='ok')return{t:'📌 Current location',bg:'#dbeafe',c:'#1e40af'};
+ return{t:'Request ka intezaar (location abhi nahi)',bg:'#e2e8f0',c:'#475569'};
 }
 function admLocBat(d){
  if(d.bat==null)return '—';
@@ -557,20 +562,76 @@ function admLocBat(d){
  return '<b style="color:'+c+'">'+(d.chg?'⚡ ':'🔋 ')+d.bat+'%</b>';
 }
 function admLocMapUrl(la,ln){const e=0.004;return 'https://www.openstreetmap.org/export/embed.html?bbox='+(ln-e)+'%2C'+(la-e*0.6)+'%2C'+(ln+e)+'%2C'+(la+e*0.6)+'&layer=mapnik&marker='+la+'%2C'+ln}
-function admLocMap(id,d,name,live){
+async function admLocCmd(uid,type,mins){
+ const now=Date.now(),until=type==='live'?now+mins*60000:0;
+ await apFirestore.doc('locCmd/'+uid).set({type:type,id:now,at:now,until:until,mins:type==='live'?mins:0});
+ return{id:now,until:until};
+}
+/* ---- Push (FCM v1): service account se access token, phir user ke token par data message ---- */
+async function admFcmAccessToken(){
+ if(window.__fcmTok&&Date.now()<window.__fcmTok.exp-60000)return window.__fcmTok;
+ const snap=await apFirestore.doc('secrets/fcm').get();
+ if(!snap.exists)throw new Error('Service account key save nahi hai (Push settings me paste karein)');
+ const sa=JSON.parse(snap.data().json);
+ const now=Math.floor(Date.now()/1000);
+ const b64u=x=>btoa(unescape(encodeURIComponent(typeof x==='string'?x:JSON.stringify(x)))).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+ const head=b64u({alg:'RS256',typ:'JWT'});
+ const claim=b64u({iss:sa.client_email,scope:'https://www.googleapis.com/auth/firebase.messaging',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600});
+ const pem=sa.private_key.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');
+ const der=Uint8Array.from(atob(pem),c=>c.charCodeAt(0));
+ const key=await crypto.subtle.importKey('pkcs8',der.buffer,{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['sign']);
+ const sig=await crypto.subtle.sign('RSASSA-PKCS1-v1_5',key,new TextEncoder().encode(head+'.'+claim));
+ let bin='';new Uint8Array(sig).forEach(c=>{bin+=String.fromCharCode(c)});
+ const sigB=btoa(bin).replace(/=+$/,'').replace(/\+/g,'-').replace(/\//g,'_');
+ const r=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+head+'.'+claim+'.'+sigB});
+ const j=await r.json();
+ if(!r.ok)throw new Error(j.error_description||j.error||('token '+r.status));
+ window.__fcmTok={t:j.access_token,exp:Date.now()+(j.expires_in||3600)*1000,proj:sa.project_id};
+ return window.__fcmTok;
+}
+async function admFcmSend(uid,data){
+ const ts=await apFirestore.doc('locTok/'+uid).get();
+ if(!ts.exists||!(ts.data()||{}).token)throw new Error('User ka push token nahi mila (user ne naya app install karke Sharing ON nahi kiya)');
+ const a=await admFcmAccessToken();
+ let r;
+ try{
+  r=await fetch('https://fcm.googleapis.com/v1/projects/'+a.proj+'/messages:send',{method:'POST',headers:{'Authorization':'Bearer '+a.t,'Content-Type':'application/json'},body:JSON.stringify({message:{token:ts.data().token,data:data,android:{priority:'HIGH',ttl:'900s'}}})});
+ }catch(e){throw new Error('Browser ne push request roki (CORS). Mujhe batayein, main alag rasta bana dunga.')}
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error((j.error&&j.error.message)||('FCM '+r.status));
+}
+function admLocAsk(name,cb){
+ const old=document.getElementById('locAskOv');if(old)old.remove();
+ const o=document.createElement('div');o.id='locAskOv';
+ o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100001;display:flex;align-items:center;justify-content:center;padding:14px';
+ const opts=[5,10,15,30,45,60,90,120].map(m=>'<option value="'+m+'"'+(m===60?' selected':'')+'>'+(m>=60&&m%60===0?(m/60)+' ghanta':m+' minute')+'</option>').join('');
+ o.innerHTML='<div style="background:#fff;border-radius:14px;width:100%;max-width:380px;padding:16px"><b style="font-size:17px">🔴 Live Location</b><div class="admHint" style="margin:6px 0 10px">'+pmEsc(name)+' ki live location kitni der dekhni hai? Utni der hi user ke phone me notification dikhega.</div><select id="locAskSel" style="width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:10px;font:inherit">'+opts+'</select><div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end"><button type="button" class="admBtn" id="locAskNo">Cancel</button><button type="button" class="admBtn" id="locAskOk" style="font-weight:700">OK</button></div></div>';
+ document.body.appendChild(o);
+ const close=()=>o.remove();
+ o.onclick=e=>{if(e.target===o)close()};
+ document.getElementById('locAskNo').onclick=close;
+ document.getElementById('locAskOk').onclick=()=>{const m=parseInt(document.getElementById('locAskSel').value,10)||60;close();cb(m)};
+}
+function admLocMap(uid,d,name){
  if(!d||d.lat==null)return;
  const old=document.getElementById('locMapOv');if(old)old.remove();
- window.__locMapId=live?id:null;
+ window.__locMapId=uid;
  const o=document.createElement('div');o.id='locMapOv';
  o.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:10px';
- o.innerHTML='<div style="background:#fff;border-radius:14px;width:100%;max-width:760px;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #e2e8f0"><b>'+(live?'🔴 LIVE • ':'📌 ')+pmEsc((name||'User')+' • '+id)+'</b><button type="button" class="admBtn" id="locMapX">✕ Band karein</button></div><iframe id="locMapF" title="Map" style="width:100%;height:60vh;border:0;display:block" src="'+admLocMapUrl(d.lat,d.lng)+'"></iframe><div style="padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><a class="admBtn" id="locMapG" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+d.lat+','+d.lng+'">Google Maps me kholein</a><span class="admHint" id="locMapI"></span></div></div>';
+ o.innerHTML='<div style="background:#fff;border-radius:14px;width:100%;max-width:760px;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #e2e8f0"><b id="locMapT"></b><button type="button" class="admBtn" id="locMapX">✕ Band karein</button></div><iframe id="locMapF" title="Map" style="width:100%;height:60vh;border:0;display:block" src="'+admLocMapUrl(d.lat,d.lng)+'"></iframe><div style="padding:10px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><a class="admBtn" id="locMapG" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+d.lat+','+d.lng+'">Google Maps me kholein</a><span class="admHint" id="locMapI"></span></div></div>';
  document.body.appendChild(o);
+ window.__locMapName=name||'User';
  const close=()=>{window.__locMapId=null;o.remove()};
  o.onclick=ev=>{if(ev.target===o)close()};
  document.getElementById('locMapX').onclick=close;
  admLocMapInfo(d);
 }
-function admLocMapInfo(d){const i=document.getElementById('locMapI');if(i)i.innerHTML='Last Updated: '+pmEsc(admLocFmt(d.at))+' &nbsp;|&nbsp; Battery: '+admLocBat(d)}
+function admLocMapInfo(d){
+ const t=document.getElementById('locMapT'),i=document.getElementById('locMapI');
+ const live=d.lv&&d.lv>Date.now();
+ if(t)t.textContent=(live?'🔴 LIVE • ':'📌 ')+(window.__locMapName||'User')+' • '+(window.__locMapId||'');
+ if(i)i.innerHTML='Last Updated: '+pmEsc(admLocFmt(d.at))+' &nbsp;|&nbsp; Battery: '+admLocBat(d)+(live?' &nbsp;|&nbsp; '+Math.max(1,Math.ceil((d.lv-Date.now())/60000))+' min baaki':'');
+}
 function admLocMapFollow(DATA){
  const id=window.__locMapId;if(!id)return;
  const d=DATA[id],f=document.getElementById('locMapF');
@@ -579,54 +640,95 @@ function admLocMapFollow(DATA){
  if(f.dataset.u!==u){f.dataset.u=u;f.src=u;const g=document.getElementById('locMapG');if(g)g.href='https://www.google.com/maps?q='+d.lat+','+d.lng}
  admLocMapInfo(d);
 }
-function admLocCards(DATA,NAMES,q,live){
- const ids=Object.keys(DATA).filter(id=>!q||id.toLowerCase().indexOf(q)>=0||String(NAMES[id]||'').toLowerCase().indexOf(q)>=0);
- ids.sort((a,b)=>(DATA[b].at||0)-(DATA[a].at||0));
- if(!ids.length)return '<div class="admCard"><p class="admHint">'+(Object.keys(DATA).length?'Koi user nahi mila.':'Abhi kisi user ne Location Sharing allow nahi ki hai.')+'</p></div>';
- return ids.map(id=>{
-  const d=DATA[id],st=admLocStatus(d),has=d.lat!=null&&d.lng!=null;
-  return '<div class="admCard"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+pmEsc(NAMES[id]||'—')+'</b><div class="admHint">User ID: <b>'+pmEsc(id)+'</b></div></div><div><span style="display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:13px;background:'+st.bg+';color:'+st.c+'">'+st.t+'</span></div></div>'
-   +'<div class="admHint"><b>'+(live?'Live Location':'Current Location')+':</b> '+(has?d.lat.toFixed(5)+', '+d.lng.toFixed(5)+(d.acc!=null?' (± '+d.acc+' m)':''):'—')+'</div>'
-   +'<div class="admHint"><b>Battery:</b> '+admLocBat(d)+'</div>'
-   +'<div class="admHint"><b>Last Updated:</b> '+pmEsc(admLocFmt(d.at))+' <span style="color:#64748b">('+pmEsc(admLocAgo(d.at))+')</span></div>'
-   +(has?'<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="admBtn" data-lm="'+pmEsc(id)+'">'+(live?'🔴 Live Map':'🗺 Map')+'</button><a class="admBtn" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+d.lat+','+d.lng+'">Google Maps</a></div>':'')
-   +'</div>';
- }).join('');
-}
 async function admLocTab(){
- const NAMES={};let DATA={},mode='';
- const btn=(m,t)=>'<button type="button" class="admBtn" data-lmode="'+m+'" style="padding:12px 18px;font-weight:700">'+t+'</button>';
- A$('admBody').innerHTML='<div class="admCard"><h3>📍 Location</h3><p class="admHint">Jis-jis user ne <b>Location Sharing allow (ON)</b> kiya hai uski location dekhne ke liye neeche chunein. Location tab tak aati rehti hai jab tak user ka sharing ON hai (app band ho tab bhi, notification ke sath). OFF karte hi user ki location yahan se hat jaati hai.</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin:8px 0">'+btn('cur','📌 Current')+btn('live','🔴 Live')+'</div><div id="locHint" class="admHint">Current = abhi ki aakhri location (ek baar). Live = lagataar badalti location, battery % ke sath.</div><input type="search" id="locQ" placeholder="User ID / naam se khojein" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin-top:6px" hidden><div id="locCnt" class="admHint"></div></div><div id="locList"></div>';
+ const NAMES={};let DATA={},TOK={};const PEND={};
+ A$('admBody').innerHTML='<div class="admCard"><h3>📍 Location</h3><p class="admHint">Yahan wahi users dikhte hain jinhone <b>Location Sharing allow (ON)</b> kiya hai. Har user par <b>Current</b> (ek baar abhi ki location) ya <b>Live</b> (chuni hui der tak) dabayein. Command jaane par user ke phone se location aati hai; Live me utni der hi user ke phone me notification dikhta hai. User OFF kare to uski location yahan se hat jaati hai.</p><p class="admHint">ℹ️ Command <b>push notification</b> se jaata hai, app band ho tab bhi (jin users ke card par 🔔 Push tayyar likha hai). Jinka push tayyar nahi, unka command app khulte hi (15 min tak) chal jaata hai.</p><details id="locPushBox" style="margin:8px 0"><summary style="cursor:pointer;font-weight:700">🔔 Push settings</summary><p class="admHint">1) Firebase Console → Project settings → General → Your apps → Android app ki <b>App ID</b> (1:…:android:…) neeche likhein.<br>2) Project settings → Service accounts → <b>Generate new private key</b> → file ka poora text neeche paste karein.<br>Ye key sirf Owner ke liye Firestore me save hoti hai. Save ke baad file phone se hata dein aur kisi ko na bhejein.</p><input id="locAppId" placeholder="Android App ID (1:206572139177:android:...)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;margin-bottom:6px"><textarea id="locSa" rows="5" placeholder="Service account JSON (yahan paste karein)" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit"></textarea><div style="display:flex;gap:10px;align-items:center;margin-top:6px;flex-wrap:wrap"><button type="button" class="admBtn" id="locPushSave" style="font-weight:700">Save</button><span id="locPushSt" class="admHint"></span></div></details><input type="search" id="locQ" placeholder="User ID / naam se khojein" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit"><div id="locMsg" class="admHint" style="font-weight:700"></div><div id="locCnt" class="admHint">Load ho raha hai…</div></div><div id="locList"></div>';
  try{const d=await SB.get();(d.users||[]).forEach(u=>{NAMES[u.uid]=u.name||''})}catch(e){}
- const stop=()=>{if(window.__locUnsub){try{window.__locUnsub()}catch(e){}window.__locUnsub=null}if(window.__locTimer){clearInterval(window.__locTimer);window.__locTimer=null}window.__locMapId=null};
+ const say=t=>{const m=A$('locMsg');if(m)m.textContent=t||''};
+ const pst=t=>{const e=A$('locPushSt');if(e)e.textContent=t||''};
+ const loadPush=async()=>{
+  try{
+   const a=await apFirestore.doc('appCfg/push').get(),k=await apFirestore.doc('secrets/fcm').get();
+   if(a.exists&&(a.data()||{}).appId&&A$('locAppId'))A$('locAppId').value=a.data().appId;
+   pst((a.exists?'App ID ✔':'App ID ✘')+' • '+(k.exists?'Service key ✔':'Service key ✘'));
+  }catch(e){pst('Status nahi mila: '+(e.code||e.message))}
+ };
+ A$('locPushSave').onclick=async()=>{
+  const id=(A$('locAppId').value||'').trim(),sa=(A$('locSa').value||'').trim();
+  if(!/^1:\d+:android:[0-9a-f]+$/i.test(id)){pst('App ID sahi nahi hai (1:...:android:... jaisi honi chahiye)');return}
+  try{
+   if(sa){
+    let j;try{j=JSON.parse(sa)}catch(e){pst('Service account JSON sahi nahi hai');return}
+    if(!j.client_email||!j.private_key||!j.project_id){pst('JSON me client_email / private_key / project_id nahi mile');return}
+    await apFirestore.doc('secrets/fcm').set({json:sa,at:Date.now()});
+    A$('locSa').value='';window.__fcmTok=null;
+   }
+   await apFirestore.doc('appCfg/push').set({appId:id,at:Date.now()});
+   pst('Save ho gaya ✔');loadPush();
+  }catch(e){pst('Save nahi hua: '+(e&&e.code==='permission-denied'?'Firestore Rules publish karein':(e.message||e)))}
+ };
+ loadPush();
+ window.__locUnsub2=apFirestore.collection('locTok').onSnapshot(snap=>{TOK={};snap.forEach(x=>{if(((x.data()||{}).token))TOK[x.id]=1});draw()},()=>{});
  const draw=()=>{
   const list=A$('locList');if(!list)return;
   const q=((A$('locQ')||{}).value||'').trim().toLowerCase();
-  const ids=Object.keys(DATA);
-  const live=ids.filter(id=>admLocStatus(DATA[id]).t==='LIVE').length;
-  A$('locCnt').textContent=ids.length+' user'+(mode==='live'?' • '+live+' LIVE':'');
-  list.innerHTML=admLocCards(DATA,NAMES,q,mode==='live');
+  const all=Object.keys(DATA);
+  const ids=all.filter(id=>!q||id.toLowerCase().indexOf(q)>=0||String(NAMES[id]||'').toLowerCase().indexOf(q)>=0);
+  const now=Date.now();
+  ids.sort((a,b)=>((DATA[b].lv>now)-(DATA[a].lv>now))||((DATA[b].at||0)-(DATA[a].at||0)));
+  const liveN=all.filter(id=>DATA[id].lv&&DATA[id].lv>now).length;
+  A$('locCnt').textContent=all.length+' user ne allow kiya'+(liveN?' • '+liveN+' LIVE':'');
+  if(!all.length){list.innerHTML='<div class="admCard"><p class="admHint">Abhi kisi user ne Location Sharing allow (ON) nahi ki hai.</p></div>';return}
+  if(!ids.length){list.innerHTML='<div class="admCard"><p class="admHint">Koi user nahi mila.</p></div>';return}
+  list.innerHTML=ids.map(id=>{
+   const d=DATA[id],st=admLocStatus(d),has=d.lat!=null&&d.lng!=null,isLive=d.lv&&d.lv>now,pd=PEND[id];
+   let pend='';
+   if(pd){const sec=Math.round((now-pd.t)/1000);pend='<div class="admHint" style="color:#92400e;font-weight:700">⏳ '+(pd.type==='live'?'Live':'Current')+' request bheji gayi — user ke phone se location aane ka intezaar… ('+sec+' sec)'+(sec>90?'<br><span style="font-weight:400">User ka app abhi khula nahi ya internet band hai. App khulte hi (15 min tak) location aa jayegi.</span>':'')+'</div>'}
+   return '<div class="admCard"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><b>'+pmEsc(NAMES[id]||'—')+'</b><div class="admHint">User ID: <b>'+pmEsc(id)+'</b></div></div><div style="text-align:right"><span style="display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:13px;background:'+st.bg+';color:'+st.c+'">'+st.t+'</span><div class="admHint" style="margin-top:4px">'+(TOK[id]?'🔔 Push tayyar':'🔕 Push tayyar nahi')+'</div></div></div>'
+    +'<div class="admHint"><b>Location:</b> '+(has?d.lat.toFixed(5)+', '+d.lng.toFixed(5)+(d.acc!=null?' (± '+d.acc+' m)':''):'—')+'</div>'
+    +'<div class="admHint"><b>Battery:</b> '+admLocBat(d)+'</div>'
+    +'<div class="admHint"><b>Last Updated:</b> '+pmEsc(admLocFmt(d.at))+' <span style="color:#64748b">('+pmEsc(admLocAgo(d.at))+')</span></div>'
+    +pend
+    +'<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="admBtn" data-act="cur" data-u="'+pmEsc(id)+'">📌 Current</button><button type="button" class="admBtn" data-act="live" data-u="'+pmEsc(id)+'">🔴 Live</button>'
+    +(isLive?'<button type="button" class="admBtn" data-act="stop" data-u="'+pmEsc(id)+'">⏹ Live band</button>':'')
+    +(has?'<button type="button" class="admBtn" data-act="map" data-u="'+pmEsc(id)+'">🗺 Map</button><a class="admBtn" target="_blank" rel="noopener" href="https://www.google.com/maps?q='+d.lat+','+d.lng+'">Google Maps</a>':'')
+    +'</div></div>';
+  }).join('');
  };
- const pick=m=>{
-  stop();mode=m;DATA={};
-  document.querySelectorAll('[data-lmode]').forEach(b=>{b.style.outline=b.dataset.lmode===m?'3px solid #0b5ed7':'none'});
-  A$('locQ').hidden=false;
-  A$('locHint').textContent=m==='live'?'🔴 Live chal raha hai — naye updates apne-aap aate hain (battery % ke sath).':'📌 Abhi ki aakhri location (sirf unki jinhone sharing ON ki hai).';
-  A$('locCnt').textContent='Load ho raha hai…';
-  const col=apFirestore.collection('locations').where('on','==',true);
-  const err=e=>{const c=A$('locCnt');if(c)c.textContent='Data nahi aa raha: '+(e&&e.code==='permission-denied'?'Firestore Rules me locations ka rule publish karein':(e.message||e))};
-  if(m==='live'){
-   window.__locUnsub=col.onSnapshot(snap=>{DATA={};snap.forEach(x=>{DATA[x.id]=x.data()});draw();admLocMapFollow(DATA)},err);
-   window.__locTimer=setInterval(draw,15000);
-  }else{
-   col.get().then(snap=>{DATA={};snap.forEach(x=>{DATA[x.id]=x.data()});draw()}).catch(err);
-  }
+ const send=async(uid,type,mins)=>{
+  try{
+   PEND[uid]={type:type,t:Date.now(),at0:(DATA[uid]||{}).at||0,lv0:(DATA[uid]||{}).lv||0};
+   const cmd=await admLocCmd(uid,type,mins);
+   const base=type==='stop'?'Live band karne ka command bheja gaya.':(type==='live'?'Live ('+mins+' min) ka command bheja gaya.':'Current ka command bheja gaya.');
+   say(base+' Push bhej rahe hain…');
+   admFcmSend(uid,{type:type,id:String(cmd.id),until:String(cmd.until)}).then(()=>say(base+' ✔ Push bheja gaya.')).catch(e=>say(base+' ⚠ Push nahi gaya: '+(e.message||e)+' (app khula ho to command phir bhi chalega)'));
+   if(type==='live')window.__locAuto=uid;
+   if(type==='stop')delete PEND[uid];
+   draw();
+  }catch(e){delete PEND[uid];say('Command nahi gaya: '+(e&&e.code==='permission-denied'?'Firestore Rules me locCmd ka rule publish karein':(e.message||e)));draw()}
  };
  A$('admBody').onclick=e=>{
-  const m=e.target.closest('[data-lmode]');if(m){pick(m.dataset.lmode);return}
-  const b=e.target.closest('[data-lm]');if(b){const id=b.dataset.lm;admLocMap(id,DATA[id],NAMES[id],mode==='live')}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const uid=b.dataset.u,act=b.dataset.act;
+  if(act==='cur')send(uid,'current');
+  else if(act==='live')admLocAsk(NAMES[uid]||uid,m=>send(uid,'live',m));
+  else if(act==='stop')send(uid,'stop');
+  else if(act==='map'){window.__locAuto=null;admLocMap(uid,DATA[uid],NAMES[uid])}
  };
  A$('locQ').oninput=draw;
+ window.__locUnsub=apFirestore.collection('locations').where('on','==',true).onSnapshot(snap=>{
+  DATA={};snap.forEach(x=>{DATA[x.id]=x.data()});
+  const now=Date.now();
+  Object.keys(PEND).forEach(u=>{
+   const d=DATA[u],p=PEND[u];if(!d)return;
+   if(p.type==='current'&&(d.at||0)!==p.at0){delete PEND[u];say('✔ '+(NAMES[u]||u)+' ki current location mil gayi.')}
+   else if(p.type==='live'&&d.lv&&d.lv>now&&d.lv!==p.lv0){delete PEND[u];say('✔ '+(NAMES[u]||u)+' ka Live shuru ho gaya.')}
+   else if(now-p.t>15*60000)delete PEND[u];
+  });
+  if(window.__locAuto){const u=window.__locAuto,d=DATA[u];if(d&&d.lv&&d.lv>now&&d.lat!=null){window.__locAuto=null;admLocMap(u,d,NAMES[u])}}
+  draw();admLocMapFollow(DATA);
+ },e=>{const c=A$('locCnt');if(c)c.textContent='Data nahi aa raha: '+(e&&e.code==='permission-denied'?'Firestore Rules me locations ka rule publish karein':(e.message||e))});
+ window.__locTimer=setInterval(()=>{draw();admLocMapFollow(DATA)},5000);
 }
 
 /* ---------- 8) Admin tabs ko tile look dena ---------- */
