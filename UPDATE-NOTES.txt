@@ -18,3 +18,6 @@ User app me naya:
 
 
 E-SHRAM: Crop Setup me ab "E-Shram Card (PDF)" section bhi hai (Front + Back box). Sirf index.html replace karein.
+
+
+Admin > Dashboard: sirf LOCATION SHARING ka description badal sakte hain (baaki sections ka fix). Sirf index.html replace karein.
